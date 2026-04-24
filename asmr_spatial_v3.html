@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>ASMR 空間オーディオ</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital@0;1&family=Shippori+Mincho:wght@400;500&display=swap');
+
+:root {
+  --bg: #1a1814;
+  --surface: #232018;
+  --surface2: #2c2820;
+  --border: #3a342a;
+  --text: #e8e0d0;
+  --text-dim: #7a6e60;
+  --text-dimmer: #4a4038;
+  --accent: #c8a96e;
+  --accent-dim: #7a6240;
+  --field-bg: #1e1b16;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Mono', monospace;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+#app {
+  width: 100%;
+  max-width: 580px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Header */
+header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+h1 {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+#mode-tag {
+  font-size: 10px;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+/* Theme bar */
+#theme-bar {
+  display: flex;
+  gap: 6px;
+}
+.theme-btn {
+  flex: 1;
+  padding: 7px 0;
+  border-radius: 6px;
+  border: 0.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+  font-size: 12px;
+  font-family: 'DM Mono', monospace;
+  cursor: pointer;
+  letter-spacing: 0.05em;
+  transition: all 0.15s;
+}
+.theme-btn.active {
+  background: var(--surface2);
+  color: var(--accent);
+  border-color: var(--accent-dim);
+}
+
+/* Main layout */
+#main {
+  display: flex;
+  gap: 10px;
+}
+
+/* Sidebar */
+#sidebar {
+  width: 68px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sidebar-label {
+  font-size: 9px;
+  color: var(--text-dimmer);
+  text-align: center;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.sound-item {
+  width: 64px;
+  height: 60px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: grab;
+  border: 0.5px solid transparent;
+  transition: transform 0.1s, opacity 0.1s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  font-family: 'DM Mono', monospace;
+}
+.sound-item:active { cursor: grabbing; }
+.sound-item.dragging { opacity: 0.3; transform: scale(0.92); }
+.sound-item-name { font-size: 11px; font-weight: 500; }
+.sound-item-sub  { font-size: 9px; opacity: 0.55; letter-spacing: 0.05em; }
+
+/* Field */
+#field-wrap { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+#field {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: var(--field-bg);
+  border-radius: 14px;
+  border: 0.5px solid var(--border);
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+  transition: border-color 0.15s;
+}
+#field.drag-over { border-color: var(--accent-dim); }
+#field.billiard-mode { border-color: #7a4a20; }
+
+#field-label {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 5px; pointer-events: none;
+  transition: opacity 0.3s;
+}
+#field-label span { font-size: 11px; color: var(--text-dimmer); letter-spacing: 0.08em; }
+
+.guide-circle {
+  position: absolute;
+  border-radius: 50%;
+  border: 0.5px solid rgba(255,255,255,0.03);
+  pointer-events: none;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Sound nodes */
+.sound-node {
+  position: absolute;
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  font-size: 11px; font-weight: 500;
+  font-family: 'DM Mono', monospace;
+  transition: transform 0.05s;
+}
+.sound-node.exploding {
+  animation: explode 0.35s ease-out forwards;
+}
+@keyframes explode {
+  0%   { transform: translate(-50%,-50%) scale(1); opacity: 1; }
+  60%  { transform: translate(-50%,-50%) scale(2.2); opacity: 0.6; }
+  100% { transform: translate(-50%,-50%) scale(0); opacity: 0; }
+}
+.sound-node .ring {
+  position: absolute; inset: -4px; border-radius: 50%;
+  border: 1px solid currentColor; opacity: 0.25;
+  animation: ring-grow 2.6s infinite ease-out; pointer-events: none;
+}
+.sound-node .ring2 {
+  position: absolute; inset: -4px; border-radius: 50%;
+  border: 0.5px solid currentColor; opacity: 0.12;
+  animation: ring-grow 2.6s 1.3s infinite ease-out; pointer-events: none;
+}
+@keyframes ring-grow {
+  0%   { transform: scale(1);   opacity: 0.25; }
+  100% { transform: scale(3);   opacity: 0; }
+}
+
+/* Controls bar */
+#controls {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.ctrl-btn {
+  padding: 7px 12px;
+  border-radius: 6px;
+  border: 0.5px solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+  font-size: 11px;
+  font-family: 'DM Mono', monospace;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.ctrl-btn:active { opacity: 0.7; }
+.ctrl-btn.active-mode {
+  background: #3a2010;
+  color: #e8904a;
+  border-color: #7a4a20;
+}
+.ctrl-btn.shuffle-active {
+  background: #1a3020;
+  color: #5abf80;
+  border-color: #2a6040;
+}
+#info {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-dimmer);
+  white-space: nowrap;
+}
+
+/* Volume bar */
+#vol-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#vol-label { font-size: 10px; color: var(--text-dimmer); letter-spacing: 0.08em; width: 28px; }
+#vol-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--border);
+  outline: none;
+  cursor: pointer;
+}
+#vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+}
+#vol-val { font-size: 10px; color: var(--text-dim); width: 28px; text-align: right; }
+
+/* Levelizer */
+#levelizer {
+  height: 36px;
+  background: var(--surface);
+  border-radius: 8px;
+  border: 0.5px solid var(--border);
+  display: flex;
+  align-items: flex-end;
+  padding: 4px 8px;
+  gap: 3px;
+  overflow: hidden;
+}
+.level-bar-wrap {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 2px;
+}
+.level-bar {
+  width: 100%;
+  border-radius: 2px 2px 0 0;
+  transition: height 0.06s ease-out;
+  min-height: 2px;
+}
+.level-name {
+  font-size: 7px;
+  color: var(--text-dimmer);
+  letter-spacing: 0.05em;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  padding-bottom: 1px;
+}
+#level-empty {
+  width: 100%;
+  text-align: center;
+  font-size: 10px;
+  color: var(--text-dimmer);
+  letter-spacing: 0.1em;
+  padding-bottom: 6px;
+}
+
+/* Drag ghost */
+#drag-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  display: none;
+  width: 50px; height: 50px;
+  border-radius: 50%;
+  align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 500;
+  font-family: 'DM Mono', monospace;
+  transform: translate(-50%,-50%);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+}
+
+#error-msg {
+  font-size: 10px;
+  color: #c04040;
+  text-align: center;
+  min-height: 12px;
+  letter-spacing: 0.04em;
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1>ASMR 空間オーディオ</h1>
+    <span id="mode-tag">v3</span>
+  </header>
+
+  <div id="theme-bar">
+    <button class="theme-btn active" onclick="switchTheme('nature')" id="btn-nature">🌿 自然系</button>
+    <button class="theme-btn" onclick="switchTheme('daily')" id="btn-daily">📖 日常系</button>
+  </div>
+
+  <div id="main">
+    <div id="sidebar">
+      <div class="sidebar-label">音源</div>
+      <div id="sound-list"></div>
+    </div>
+    <div id="field-wrap">
+      <div id="field"
+        ondragover="onDragOver(event)"
+        ondragleave="onDragLeave(event)"
+        ondrop="onDrop(event)">
+        <div class="guide-circle" style="width:33%;height:33%;"></div>
+        <div class="guide-circle" style="width:66%;height:66%;"></div>
+        <div class="guide-circle" style="width:99%;height:99%;"></div>
+        <div id="field-label">
+          <span>← 音源をドラッグ</span>
+          <span style="font-size:9px;margin-top:2px;">中心=近　端=遠</span>
+        </div>
+      </div>
+
+      <div id="controls">
+        <button class="ctrl-btn" onclick="resetAll()">全消去</button>
+        <button class="ctrl-btn" id="shuffle-btn" onclick="toggleShuffle()">シャッフル</button>
+        <button class="ctrl-btn" id="billiard-btn" onclick="toggleBilliard()">ビリヤード</button>
+        <div id="info">0 / 5</div>
+      </div>
+
+      <div id="vol-row">
+        <span id="vol-label">VOL</span>
+        <input type="range" id="vol-slider" min="0" max="1" step="0.01" value="0.8" oninput="onVolChange(this.value)">
+        <span id="vol-val">80%</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Levelizer -->
+  <div id="levelizer">
+    <span id="level-empty">— NO SOURCE —</span>
+  </div>
+
+  <div id="error-msg"></div>
+</div>
+
+<div id="drag-ghost"></div>
+
+<script>
+const THEMES = {
+  nature: { sounds: [
+    { label: '雨',    sub: 'Rain',    file: 'rain.mp3',    color: '#4a9fd4', bg: 'rgba(74,159,212,0.12)',  border: 'rgba(74,159,212,0.4)'  },
+    { label: '森',    sub: 'Forest',  file: 'forest.mp3',  color: '#5ab86c', bg: 'rgba(90,184,108,0.12)',  border: 'rgba(90,184,108,0.4)'  },
+    { label: '川',    sub: 'River',   file: 'river.mp3',   color: '#4acfb8', bg: 'rgba(74,207,184,0.12)',  border: 'rgba(74,207,184,0.4)'  },
+  ]},
+  daily: { sounds: [
+    { label: 'Page',  sub: 'ページ',  file: 'page.mp3',    color: '#d4a84a', bg: 'rgba(212,168,74,0.12)',  border: 'rgba(212,168,74,0.4)'  },
+    { label: 'Type',  sub: 'タイプ',  file: 'typing.mp3',  color: '#a07ad4', bg: 'rgba(160,122,212,0.12)', border: 'rgba(160,122,212,0.4)' },
+    { label: 'Cook',  sub: '料理',    file: 'cooking.mp3', color: '#d46a4a', bg: 'rgba(212,106,74,0.12)',  border: 'rgba(212,106,74,0.4)'  },
+  ]}
+};
+
+let currentTheme = 'nature';
+let audioCtx = null;
+let masterGain = null;
+let nodes = [];
+const MAX_NODES = 5;
+let buffers = {};
+let dragSound = null;
+let touchDragSound = null;
+const ghost = document.getElementById('drag-ghost');
+
+// Shuffle & billiard state
+let shuffleActive = false;
+let shuffleInterval = null;
+let billiardActive = false;
+let billiardRAF = null;
+
+/* ---- Audio ---- */
+function getCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = 0.8;
+    masterGain.connect(audioCtx.destination);
+    const l = audioCtx.listener;
+    if (l.positionX) {
+      l.positionX.value=0; l.positionY.value=0; l.positionZ.value=0;
+      l.forwardX.value=0; l.forwardY.value=0; l.forwardZ.value=-1;
+      l.upX.value=0; l.upY.value=1; l.upZ.value=0;
+    } else { l.setPosition(0,0,0); l.setOrientation(0,0,-1,0,1,0); }
+  }
+  return audioCtx;
+}
+
+async function loadBuffer(file) {
+  if (buffers[file]) return buffers[file];
+  try {
+    const ctx = getCtx();
+    const r = await fetch(file);
+    if (!r.ok) throw new Error();
+    const buf = await ctx.decodeAudioData(await r.arrayBuffer());
+    buffers[file] = buf;
+    return buf;
+  } catch { return null; }
+}
+
+function onVolChange(v) {
+  if (masterGain) masterGain.gain.value = parseFloat(v);
+  document.getElementById('vol-val').textContent = Math.round(v*100) + '%';
+}
+
+/* ---- Spatial ---- */
+function toWorld(rx, ry, W, H) {
+  return { wx: ((rx/W)*2-1)*6, wy: -(((ry/H)*2-1))*6, wz: -1 };
+}
+function gainFromPos(rx, ry, W, H) {
+  const cx=W/2, cy=H/2;
+  const d = Math.sqrt((rx-cx)**2+(ry-cy)**2);
+  return Math.max(0.12, 1-(d/Math.sqrt(cx**2+cy**2))*0.75);
+}
+
+function updatePanner(nd) {
+  const field = document.getElementById('field');
+  const W = field.clientWidth, H = field.clientHeight;
+  const {wx,wy,wz} = toWorld(nd.rx, nd.ry, W, H);
+  if (nd.panner.positionX) {
+    nd.panner.positionX.value=wx; nd.panner.positionY.value=wy; nd.panner.positionZ.value=wz;
+  } else { nd.panner.setPosition(wx,wy,wz); }
+  nd.gainNode.gain.value = gainFromPos(nd.rx, nd.ry, W, H);
+  nd.el.style.left = nd.rx + 'px';
+  nd.el.style.top  = nd.ry + 'px';
+}
+
+/* ---- Place node ---- */
+async function placeNode(sound, clientX, clientY) {
+  if (nodes.length >= MAX_NODES) { showError('最大5個まで。ノードをタップして削除してください。'); return; }
+  clearError();
+  const field = document.getElementById('field');
+  const rect = field.getBoundingClientRect();
+  const rx = clientX - rect.left;
+  const ry = clientY - rect.top;
+  const W = rect.width, H = rect.height;
+  if (rx<0||ry<0||rx>W||ry>H) return;
+
+  const ctx = getCtx();
+  if (ctx.state==='suspended') await ctx.resume();
+
+  const buf = await loadBuffer(sound.file);
+  const gainNode = ctx.createGain();
+  const analyser = ctx.createAnalyser();
+  analyser.fftSize = 256;
+  const panner = ctx.createPanner();
+  panner.panningModel='HRTF'; panner.distanceModel='inverse';
+  panner.refDistance=1; panner.maxDistance=20; panner.rolloffFactor=1.5;
+  panner.connect(gainNode); gainNode.connect(analyser); analyser.connect(masterGain);
+
+  let source = null;
+  if (buf) {
+    source = ctx.createBufferSource();
+    source.buffer=buf; source.loop=true;
+    source.connect(panner); source.start();
+  } else {
+    showError('ファイルなし（'+sound.file+'）— HTMLと同フォルダに置いてください');
+  }
+
+  const el = document.createElement('div');
+  el.className = 'sound-node';
+  el.style.background = sound.bg;
+  el.style.color = sound.color;
+  el.style.border = '1px solid '+sound.border;
+  el.innerHTML = `<span class="ring" style="border-color:${sound.color}"></span><span class="ring2" style="border-color:${sound.color}"></span>${sound.label}`;
+
+  const nd = { el, source, gainNode, analyser, panner, sound, rx, ry,
+    vx: 0, vy: 0 // velocity for billiard
+  };
+
+  el.addEventListener('click', e => { e.stopPropagation(); if (!billiardActive) removeNode(nd); });
+  el.addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); if (!billiardActive) removeNode(nd); });
+  field.appendChild(el);
+  nodes.push(nd);
+  updatePanner(nd);
+  updateInfo();
+  rebuildLevelizer();
+}
+
+function removeNode(nd, animate=false) {
+  if (animate) {
+    nd.el.classList.add('exploding');
+    setTimeout(() => _cleanNode(nd), 350);
+  } else {
+    _cleanNode(nd);
+  }
+}
+function _cleanNode(nd) {
+  try { if (nd.source) nd.source.stop(); } catch {}
+  try { nd.gainNode.disconnect(); } catch {}
+  nd.el.remove();
+  nodes = nodes.filter(n=>n!==nd);
+  updateInfo();
+  rebuildLevelizer();
+}
+
+function resetAll() {
+  stopShuffle(); stopBilliard();
+  [...nodes].forEach(n=>removeNode(n));
+}
+
+function updateInfo() {
+  const lbl = document.getElementById('field-label');
+  lbl.style.opacity = nodes.length>0 ? '0' : '1';
+  document.getElementById('info').textContent = nodes.length+' / '+MAX_NODES;
+}
+
+/* ---- Levelizer ---- */
+const levelData = new Uint8Array(128);
+function rebuildLevelizer() {
+  const lz = document.getElementById('levelizer');
+  lz.innerHTML = '';
+  if (nodes.length===0) {
+    lz.innerHTML = '<span id="level-empty">— NO SOURCE —</span>';
+    return;
+  }
+  nodes.forEach(nd => {
+    const wrap = document.createElement('div');
+    wrap.className = 'level-bar-wrap';
+    const bar = document.createElement('div');
+    bar.className = 'level-bar';
+    bar.style.background = nd.sound.color;
+    bar.style.height = '2px';
+    const name = document.createElement('div');
+    name.className = 'level-name';
+    name.style.color = nd.sound.color;
+    name.textContent = nd.sound.label;
+    wrap.appendChild(bar);
+    wrap.appendChild(name);
+    lz.appendChild(wrap);
+    nd._bar = bar;
+  });
+}
+
+function tickLevelizer() {
+  nodes.forEach(nd => {
+    if (!nd._bar || !nd.analyser) return;
+    nd.analyser.getByteFrequencyData(levelData);
+    let sum=0;
+    for (let i=0;i<60;i++) sum+=levelData[i];
+    const avg = sum/60/255;
+    const h = Math.max(2, avg*28);
+    nd._bar.style.height = h+'px';
+  });
+}
+
+/* ---- Shuffle ---- */
+function toggleShuffle() {
+  shuffleActive = !shuffleActive;
+  const btn = document.getElementById('shuffle-btn');
+  if (shuffleActive) {
+    btn.classList.add('shuffle-active');
+    btn.textContent = '■ シャッフル';
+    shuffleInterval = setInterval(doShuffle, 1800);
+  } else {
+    stopShuffle();
+  }
+}
+function stopShuffle() {
+  shuffleActive = false;
+  clearInterval(shuffleInterval);
+  shuffleInterval = null;
+  const btn = document.getElementById('shuffle-btn');
+  btn.classList.remove('shuffle-active');
+  btn.textContent = 'シャッフル';
+}
+function doShuffle() {
+  if (nodes.length===0) return;
+  const field = document.getElementById('field');
+  const W = field.clientWidth, H = field.clientHeight;
+  const MARGIN = 30;
+  nodes.forEach(nd => {
+    const tx = MARGIN + Math.random()*(W-MARGIN*2);
+    const ty = MARGIN + Math.random()*(H-MARGIN*2);
+    animateMove(nd, tx, ty, 800);
+  });
+}
+function animateMove(nd, tx, ty, duration) {
+  const sx=nd.rx, sy=nd.ry;
+  const start=performance.now();
+  function step(now) {
+    const t=Math.min(1,(now-start)/duration);
+    const e=1-Math.pow(1-t,3); // ease out cubic
+    nd.rx=sx+(tx-sx)*e;
+    nd.ry=sy+(ty-sy)*e;
+    updatePanner(nd);
+    if (t<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ---- Billiard ---- */
+function toggleBilliard() {
+  billiardActive = !billiardActive;
+  const btn = document.getElementById('billiard-btn');
+  if (billiardActive) {
+    stopShuffle();
+    btn.classList.add('active-mode');
+    btn.textContent = '■ ビリヤード';
+    document.getElementById('field').classList.add('billiard-mode');
+    // give each node a random velocity
+    nodes.forEach(nd => {
+      const speed = 1.2 + Math.random()*1.6;
+      const angle = Math.random()*Math.PI*2;
+      nd.vx = Math.cos(angle)*speed;
+      nd.vy = Math.sin(angle)*speed;
+    });
+    billiardRAF = requestAnimationFrame(billiardTick);
+  } else {
+    stopBilliard();
+  }
+}
+function stopBilliard() {
+  billiardActive = false;
+  cancelAnimationFrame(billiardRAF);
+  billiardRAF = null;
+  const btn = document.getElementById('billiard-btn');
+  btn.classList.remove('active-mode');
+  btn.textContent = 'ビリヤード';
+  document.getElementById('field').classList.remove('billiard-mode');
+  nodes.forEach(nd=>{ nd.vx=0; nd.vy=0; });
+}
+
+function billiardTick() {
+  if (!billiardActive) return;
+  const field = document.getElementById('field');
+  const W = field.clientWidth, H = field.clientHeight;
+  const R = 25; // node radius
+
+  // Move
+  nodes.forEach(nd => {
+    nd.rx += nd.vx;
+    nd.ry += nd.vy;
+    // Wall bounce
+    if (nd.rx <= R)    { nd.rx = R;   nd.vx = Math.abs(nd.vx); }
+    if (nd.rx >= W-R)  { nd.rx = W-R; nd.vx = -Math.abs(nd.vx); }
+    if (nd.ry <= R)    { nd.ry = R;   nd.vy = Math.abs(nd.vy); }
+    if (nd.ry >= H-R)  { nd.ry = H-R; nd.vy = -Math.abs(nd.vy); }
+    updatePanner(nd);
+  });
+
+  // Collision detection → explode both
+  const toRemove = new Set();
+  for (let i=0;i<nodes.length;i++) {
+    for (let j=i+1;j<nodes.length;j++) {
+      const a=nodes[i], b=nodes[j];
+      if (toRemove.has(a)||toRemove.has(b)) continue;
+      const dx=a.rx-b.rx, dy=a.ry-b.ry;
+      const dist=Math.sqrt(dx*dx+dy*dy);
+      if (dist < R*2) {
+        toRemove.add(a); toRemove.add(b);
+      }
+    }
+  }
+  toRemove.forEach(nd => removeNode(nd, true));
+
+  tickLevelizer();
+  billiardRAF = requestAnimationFrame(billiardTick);
+}
+
+/* ---- Theme / Sidebar ---- */
+function switchTheme(t) {
+  if (currentTheme===t) return;
+  resetAll();
+  currentTheme=t;
+  document.querySelectorAll('.theme-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('btn-'+t).classList.add('active');
+  buildSidebar();
+  clearError();
+}
+
+function buildSidebar() {
+  const list = document.getElementById('sound-list');
+  list.innerHTML='';
+  THEMES[currentTheme].sounds.forEach(sound => {
+    const item = document.createElement('div');
+    item.className='sound-item';
+    item.draggable=true;
+    item.style.background=sound.bg;
+    item.style.color=sound.color;
+    item.style.borderColor=sound.border;
+    item.innerHTML=`<span class="sound-item-name">${sound.label}</span><span class="sound-item-sub">${sound.sub}</span>`;
+
+    item.addEventListener('dragstart', e => {
+      dragSound=sound; item.classList.add('dragging');
+      e.dataTransfer.effectAllowed='copy';
+      e.dataTransfer.setDragImage(new Image(),0,0);
+      ghost.style.background=sound.bg; ghost.style.color=sound.color;
+      ghost.style.border='1px solid '+sound.border;
+      ghost.textContent=sound.label; ghost.style.display='flex';
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging'); ghost.style.display='none'; dragSound=null;
+    });
+    item.addEventListener('touchstart', () => {
+      touchDragSound=sound; item.classList.add('dragging');
+      ghost.style.background=sound.bg; ghost.style.color=sound.color;
+      ghost.style.border='1px solid '+sound.border;
+      ghost.textContent=sound.label; ghost.style.display='flex';
+    }, { passive:true });
+    item.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const t=e.touches[0];
+      ghost.style.left=t.clientX+'px'; ghost.style.top=t.clientY+'px';
+    }, { passive:false });
+    item.addEventListener('touchend', e => {
+      ghost.style.display='none'; item.classList.remove('dragging');
+      if (!touchDragSound) return;
+      const t=e.changedTouches[0];
+      const field=document.getElementById('field');
+      const rect=field.getBoundingClientRect();
+      if (t.clientX>=rect.left&&t.clientX<=rect.right&&t.clientY>=rect.top&&t.clientY<=rect.bottom) {
+        placeNode(touchDragSound, t.clientX, t.clientY);
+      }
+      touchDragSound=null;
+    });
+    list.appendChild(item);
+  });
+}
+
+/* ---- Drag & Drop on field ---- */
+document.addEventListener('dragover', e => {
+  ghost.style.left=e.clientX+'px'; ghost.style.top=e.clientY+'px';
+});
+function onDragOver(e) {
+  e.preventDefault(); e.dataTransfer.dropEffect='copy';
+  document.getElementById('field').classList.add('drag-over');
+}
+function onDragLeave() { document.getElementById('field').classList.remove('drag-over'); }
+function onDrop(e) {
+  e.preventDefault(); document.getElementById('field').classList.remove('drag-over');
+  if (!dragSound) return;
+  placeNode(dragSound, e.clientX, e.clientY);
+  dragSound=null;
+}
+
+/* ---- Levelizer ticker (non-billiard) ---- */
+setInterval(() => { if (!billiardActive) tickLevelizer(); }, 80);
+
+/* ---- Errors ---- */
+function showError(m) { document.getElementById('error-msg').textContent=m; }
+function clearError()  { document.getElementById('error-msg').textContent=''; }
+
+/* ---- Init ---- */
+buildSidebar();
+</script>
+</body>
+</html>
