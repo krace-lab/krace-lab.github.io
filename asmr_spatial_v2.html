@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>ASMR 空間オーディオ</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  background: #f2f0eb;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+}
+#app {
+  width: 100%;
+  max-width: 560px;
+}
+h1 {
+  font-size: 15px;
+  font-weight: 500;
+  color: #444;
+  margin-bottom: 10px;
+  letter-spacing: 0.02em;
+}
+#theme-bar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.theme-btn {
+  flex: 1;
+  padding: 8px 0;
+  border-radius: 8px;
+  border: 0.5px solid #ccc;
+  background: #e8e6e0;
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, color 0.15s;
+}
+.theme-btn.active {
+  background: #fff;
+  color: #222;
+  border-color: #aaa;
+  font-weight: 500;
+}
+
+/* メインレイアウト：左サイドバー + フィールド */
+#main {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+/* 左サイドバー */
+#sidebar {
+  width: 72px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.sidebar-label {
+  font-size: 10px;
+  color: #aaa;
+  text-align: center;
+  margin-bottom: 2px;
+  letter-spacing: 0.03em;
+}
+.sound-item {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  cursor: grab;
+  border: 1px solid transparent;
+  transition: transform 0.1s, box-shadow 0.1s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  font-family: inherit;
+}
+.sound-item:active { cursor: grabbing; }
+.sound-item.dragging {
+  opacity: 0.4;
+  transform: scale(0.95);
+}
+.sound-item-name {
+  font-size: 10px;
+  font-weight: 500;
+}
+.sound-item-sub {
+  font-size: 9px;
+  opacity: 0.6;
+}
+
+/* ドラッグゴースト */
+#drag-ghost {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  display: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+}
+
+/* フィールド */
+#field-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#field {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #e8e5de;
+  border-radius: 14px;
+  border: 0.5px solid #d0cec7;
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+}
+#field.drag-over {
+  border: 1.5px solid #888;
+  background: #e0ddd6;
+}
+#field-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #bbb;
+  pointer-events: none;
+  transition: opacity 0.3s;
+  text-align: center;
+  line-height: 1.6;
+}
+.guide-circle {
+  position: absolute;
+  border-radius: 50%;
+  border: 0.5px dashed rgba(0,0,0,0.07);
+  pointer-events: none;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* フィールド上の音源ノード */
+.sound-node {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: inherit;
+}
+.sound-node .ring {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1.5px solid currentColor;
+  opacity: 0.35;
+  animation: ring-grow 2.4s infinite ease-out;
+  pointer-events: none;
+}
+.sound-node .ring2 {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0.18;
+  animation: ring-grow 2.4s 1.2s infinite ease-out;
+  pointer-events: none;
+}
+@keyframes ring-grow {
+  0%   { transform: scale(1);   opacity: 0.35; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+
+/* 下部バー */
+#bottom-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#reset-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 0.5px solid #ccc;
+  background: #e8e6e0;
+  color: #666;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+#reset-btn:active { opacity: 0.7; }
+#info { flex: 1; font-size: 11px; color: #bbb; text-align: right; }
+#hint {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #bbb;
+  text-align: center;
+}
+#error-msg {
+  margin-top: 6px;
+  font-size: 11px;
+  color: #c0392b;
+  text-align: center;
+  min-height: 14px;
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <h1>ASMR 空間オーディオ</h1>
+
+  <div id="theme-bar">
+    <button class="theme-btn active" onclick="switchTheme('nature')" id="btn-nature">🌿 自然系</button>
+    <button class="theme-btn" onclick="switchTheme('daily')" id="btn-daily">📖 日常系</button>
+  </div>
+
+  <div id="main">
+    <!-- 左サイドバー -->
+    <div id="sidebar">
+      <div class="sidebar-label">ドラッグ</div>
+      <div id="sound-list"></div>
+    </div>
+
+    <!-- フィールド -->
+    <div id="field-wrap">
+      <div id="field"
+        ondragover="onDragOver(event)"
+        ondragleave="onDragLeave(event)"
+        ondrop="onDrop(event)">
+        <div class="guide-circle" style="width:33%;height:33%;"></div>
+        <div class="guide-circle" style="width:66%;height:66%;"></div>
+        <div class="guide-circle" style="width:99%;height:99%;"></div>
+        <div id="field-label">
+          <span>←  音源をドラッグ</span>
+          <span style="font-size:10px;">中心 = 近い　端 = 遠い</span>
+        </div>
+      </div>
+      <div id="bottom-bar">
+        <button id="reset-btn" onclick="resetAll()">全消去</button>
+        <div id="info">0 / 5</div>
+      </div>
+    </div>
+  </div>
+
+  <div id="hint">🎧 イヤホン推奨</div>
+  <div id="error-msg"></div>
+</div>
+
+<!-- ドラッグゴースト -->
+<div id="drag-ghost"></div>
+
+<script>
+const THEMES = {
+  nature: {
+    sounds: [
+      { label: '雨',   sub: 'Rain',    file: 'rain.mp3',   color: '#185FA5', bg: '#dbeafe' },
+      { label: '森',   sub: 'Forest',  file: 'forest.mp3', color: '#3B6D11', bg: '#dcf5c4' },
+      { label: '川',   sub: 'River',   file: 'river.mp3',  color: '#0F6E56', bg: '#d1f5ea' },
+    ]
+  },
+  daily: {
+    sounds: [
+      { label: 'ページ', sub: 'Page',    file: 'page.mp3',    color: '#BA7517', bg: '#fef3c7' },
+      { label: 'タイプ', sub: 'Typing',  file: 'typing.mp3',  color: '#534AB7', bg: '#ede9fe' },
+      { label: '料理',   sub: 'Kitchen', file: 'cooking.mp3', color: '#993C1D', bg: '#fee2e2' },
+    ]
+  }
+};
+
+let currentTheme = 'nature';
+let audioCtx = null;
+let nodes = [];
+const MAX_NODES = 5;
+let buffers = {};
+let dragSound = null;
+let touchDragSound = null;
+let ghost = document.getElementById('drag-ghost');
+
+/* ---- Audio Context ---- */
+function getAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const l = audioCtx.listener;
+    if (l.positionX) {
+      l.positionX.value = 0; l.positionY.value = 0; l.positionZ.value = 0;
+      l.forwardX.value = 0; l.forwardY.value = 0; l.forwardZ.value = -1;
+      l.upX.value = 0; l.upY.value = 1; l.upZ.value = 0;
+    } else {
+      l.setPosition(0,0,0); l.setOrientation(0,0,-1,0,1,0);
+    }
+  }
+  return audioCtx;
+}
+
+async function loadBuffer(file) {
+  if (buffers[file]) return buffers[file];
+  try {
+    const ctx = getAudioCtx();
+    const resp = await fetch(file);
+    if (!resp.ok) throw new Error('not found');
+    const arr = await resp.arrayBuffer();
+    const buf = await ctx.decodeAudioData(arr);
+    buffers[file] = buf;
+    return buf;
+  } catch(e) { return null; }
+}
+
+/* ---- Spatial helpers ---- */
+function tapToWorld(relX, relY, W, H) {
+  return {
+    wx: ((relX / W) * 2 - 1) * 6,
+    wy: -(((relY / H) * 2 - 1)) * 6,
+    wz: -1
+  };
+}
+function distanceGain(relX, relY, W, H) {
+  const cx = W/2, cy = H/2;
+  const dist = Math.sqrt((relX-cx)**2 + (relY-cy)**2);
+  const maxDist = Math.sqrt(cx**2 + cy**2);
+  return Math.max(0.15, 1 - (dist/maxDist)*0.75);
+}
+
+/* ---- Place sound node ---- */
+async function placeNode(sound, clientX, clientY) {
+  if (nodes.length >= MAX_NODES) {
+    showError('最大5個まで。ノードをタップして削除するか全消去してください。');
+    return;
+  }
+  clearError();
+
+  const field = document.getElementById('field');
+  const rect = field.getBoundingClientRect();
+  const relX = clientX - rect.left;
+  const relY = clientY - rect.top;
+  const W = rect.width, H = rect.height;
+  if (relX < 0 || relY < 0 || relX > W || relY > H) return;
+
+  const ctx = getAudioCtx();
+  if (ctx.state === 'suspended') await ctx.resume();
+
+  const buf = await loadBuffer(sound.file);
+  const gainNode = ctx.createGain();
+  const panner = ctx.createPanner();
+  panner.panningModel = 'HRTF';
+  panner.distanceModel = 'inverse';
+  panner.refDistance = 1;
+  panner.maxDistance = 20;
+  panner.rolloffFactor = 1.5;
+
+  const { wx, wy, wz } = tapToWorld(relX, relY, W, H);
+  if (panner.positionX) {
+    panner.positionX.value = wx;
+    panner.positionY.value = wy;
+    panner.positionZ.value = wz;
+  } else {
+    panner.setPosition(wx, wy, wz);
+  }
+  gainNode.gain.value = distanceGain(relX, relY, W, H);
+  panner.connect(gainNode);
+  gainNode.connect(ctx.destination);
+
+  let source = null;
+  if (buf) {
+    source = ctx.createBufferSource();
+    source.buffer = buf;
+    source.loop = true;
+    source.connect(panner);
+    source.start();
+  } else {
+    showError('ファイルが見つかりません（' + sound.file + '）— HTMLと同フォルダに置いてください');
+  }
+
+  const el = document.createElement('div');
+  el.className = 'sound-node';
+  el.style.left = relX + 'px';
+  el.style.top = relY + 'px';
+  el.style.background = sound.bg;
+  el.style.color = sound.color;
+  el.style.border = '1.5px solid ' + sound.color;
+  el.innerHTML = `<span class="ring" style="border-color:${sound.color}"></span><span class="ring2" style="border-color:${sound.color}"></span>${sound.label}`;
+  el.title = 'クリックで削除';
+
+  const nd = { el, source, gainNode, panner };
+  el.addEventListener('click', e => { e.stopPropagation(); removeNode(nd); });
+  el.addEventListener('touchend', e => { e.stopPropagation(); e.preventDefault(); removeNode(nd); });
+  field.appendChild(el);
+  nodes.push(nd);
+  updateInfo();
+}
+
+function removeNode(nd) {
+  try { if (nd.source) nd.source.stop(); } catch(e) {}
+  try { nd.gainNode.disconnect(); } catch(e) {}
+  nd.el.remove();
+  nodes = nodes.filter(n => n !== nd);
+  updateInfo();
+  clearError();
+}
+
+function resetAll() {
+  [...nodes].forEach(n => removeNode(n));
+}
+
+function updateInfo() {
+  const lbl = document.getElementById('field-label');
+  lbl.style.opacity = nodes.length > 0 ? '0' : '1';
+  document.getElementById('info').textContent = nodes.length + ' / ' + MAX_NODES;
+}
+
+/* ---- Theme ---- */
+function switchTheme(t) {
+  if (currentTheme === t) return;
+  resetAll();
+  currentTheme = t;
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('btn-' + t).classList.add('active');
+  buildSidebar();
+  clearError();
+}
+
+function buildSidebar() {
+  const list = document.getElementById('sound-list');
+  list.innerHTML = '';
+  THEMES[currentTheme].sounds.forEach(sound => {
+    const item = document.createElement('div');
+    item.className = 'sound-item';
+    item.draggable = true;
+    item.style.background = sound.bg;
+    item.style.color = sound.color;
+    item.style.borderColor = sound.color + '55';
+    item.innerHTML = `<span class="sound-item-name">${sound.label}</span><span class="sound-item-sub">${sound.sub}</span>`;
+
+    /* Desktop drag */
+    item.addEventListener('dragstart', e => {
+      dragSound = sound;
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'copy';
+      e.dataTransfer.setDragImage(new Image(), 0, 0);
+      ghost.style.background = sound.bg;
+      ghost.style.color = sound.color;
+      ghost.style.border = '1.5px solid ' + sound.color;
+      ghost.textContent = sound.label;
+      ghost.style.display = 'flex';
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      ghost.style.display = 'none';
+      dragSound = null;
+    });
+
+    /* Touch drag */
+    item.addEventListener('touchstart', e => {
+      touchDragSound = sound;
+      item.classList.add('dragging');
+      ghost.style.background = sound.bg;
+      ghost.style.color = sound.color;
+      ghost.style.border = '1.5px solid ' + sound.color;
+      ghost.textContent = sound.label;
+      ghost.style.display = 'flex';
+    }, { passive: true });
+
+    item.addEventListener('touchmove', e => {
+      e.preventDefault();
+      const t = e.touches[0];
+      ghost.style.left = t.clientX + 'px';
+      ghost.style.top = t.clientY + 'px';
+    }, { passive: false });
+
+    item.addEventListener('touchend', e => {
+      ghost.style.display = 'none';
+      item.classList.remove('dragging');
+      if (!touchDragSound) return;
+      const t = e.changedTouches[0];
+      const field = document.getElementById('field');
+      const rect = field.getBoundingClientRect();
+      if (
+        t.clientX >= rect.left && t.clientX <= rect.right &&
+        t.clientY >= rect.top  && t.clientY <= rect.bottom
+      ) {
+        placeNode(touchDragSound, t.clientX, t.clientY);
+      }
+      touchDragSound = null;
+    });
+
+    list.appendChild(item);
+  });
+}
+
+/* ---- Desktop drag & drop on field ---- */
+document.addEventListener('dragover', e => {
+  ghost.style.left = e.clientX + 'px';
+  ghost.style.top = e.clientY + 'px';
+});
+
+function onDragOver(e) {
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'copy';
+  document.getElementById('field').classList.add('drag-over');
+}
+function onDragLeave(e) {
+  document.getElementById('field').classList.remove('drag-over');
+}
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('field').classList.remove('drag-over');
+  if (!dragSound) return;
+  placeNode(dragSound, e.clientX, e.clientY);
+  dragSound = null;
+}
+
+/* ---- Errors ---- */
+function showError(msg) { document.getElementById('error-msg').textContent = msg; }
+function clearError() { document.getElementById('error-msg').textContent = ''; }
+
+/* ---- Init ---- */
+buildSidebar();
+</script>
+</body>
+</html>
