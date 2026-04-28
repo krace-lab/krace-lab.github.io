@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>羽田盃（JpnI）完全解説 2026｜レース構造と過去傾向</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;600;700;900&family=Noto+Sans+JP:wght@300;400;500;700&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --dirt: #8B5E3C;
+    --dirt-light: #C49A6C;
+    --dirt-pale: #F5EBE0;
+    --track: #2D1B0E;
+    --turf: #1A3A2A;
+    --accent: #C9962A;
+    --accent-bright: #F0B840;
+    --text-main: #1A1208;
+    --text-sub: #5C4030;
+    --text-muted: #9A7A60;
+    --border: #D4B896;
+    --bg: #FDFAF6;
+    --card: #FFFFFF;
+    --shadow: rgba(139,94,60,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans JP', sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    line-height: 1.8;
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ─── HERO ─── */
+  .hero {
+    position: relative;
+    background: var(--track);
+    margin: 0 -24px 60px;
+    padding: 70px 48px 60px;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 40px,
+      rgba(201,150,42,0.04) 40px,
+      rgba(201,150,42,0.04) 80px
+    );
+  }
+  .hero::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--dirt), var(--accent), var(--dirt));
+  }
+  .hero-label {
+    font-family: 'DM Serif Display', serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .hero-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 900;
+    color: #F5EBE0;
+    line-height: 1.2;
+    position: relative;
+    letter-spacing: -0.5px;
+  }
+  .hero-title em {
+    font-style: normal;
+    color: var(--accent-bright);
+  }
+  .hero-sub {
+    margin-top: 20px;
+    font-size: 14px;
+    color: rgba(245,235,224,0.6);
+    letter-spacing: 1px;
+    position: relative;
+  }
+  .hero-badges {
+    display: flex;
+    gap: 10px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+  .badge {
+    display: inline-block;
+    padding: 5px 14px;
+    border: 1px solid;
+    font-size: 11px;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  .badge-gold { border-color: var(--accent); color: var(--accent); }
+  .badge-white { border-color: rgba(245,235,224,0.4); color: rgba(245,235,224,0.7); }
+
+  /* ─── RACE SPEC BOX ─── */
+  .spec-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 56px;
+    box-shadow: 0 4px 20px var(--shadow);
+  }
+  .spec-item {
+    background: var(--card);
+    padding: 18px 20px;
+  }
+  .spec-label {
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    font-weight: 700;
+  }
+  .spec-value {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--dirt);
+  }
+  .spec-value.big {
+    font-size: 20px;
+    color: var(--accent);
+  }
+
+  /* ─── SECTION ─── */
+  .section {
+    margin-bottom: 60px;
+  }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 28px;
+    border-bottom: 2px solid var(--track);
+    padding-bottom: 14px;
+  }
+  .section-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 42px;
+    color: var(--border);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .section-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--track);
+    line-height: 1.3;
+  }
+
+  /* ─── PROSE ─── */
+  p {
+    font-size: 15px;
+    line-height: 1.9;
+    color: var(--text-sub);
+    margin-bottom: 16px;
+  }
+  p strong {
+    color: var(--text-main);
+    font-weight: 700;
+  }
+
+  /* ─── HISTORY TIMELINE ─── */
+  .timeline {
+    position: relative;
+    padding-left: 28px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--accent), var(--border));
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+    padding-left: 20px;
+  }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -24px;
+    top: 7px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .timeline-year {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--accent);
+    margin-bottom: 2px;
+  }
+  .timeline-text {
+    font-size: 14px;
+    color: var(--text-sub);
+    line-height: 1.7;
+  }
+
+  /* ─── STATS GRID ─── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 540px) { .stats-row { grid-template-columns: 1fr 1fr; } }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 22px 18px;
+    text-align: center;
+    box-shadow: 0 2px 12px var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+  .stat-card:hover::after { transform: scaleX(1); }
+  .stat-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 38px;
+    color: var(--dirt);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .stat-num span {
+    font-size: 20px;
+    color: var(--accent);
+  }
+  .stat-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+    line-height: 1.5;
+  }
+
+  /* ─── DATA TABLE ─── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 28px;
+    box-shadow: 0 2px 16px var(--shadow);
+  }
+  .data-table th {
+    background: var(--track);
+    color: var(--dirt-pale);
+    padding: 11px 14px;
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 1px;
+    font-weight: 700;
+  }
+  .data-table td {
+    padding: 11px 14px;
+    border-bottom: 1px solid var(--dirt-pale);
+    color: var(--text-sub);
+    vertical-align: middle;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:nth-child(even) td { background: #FBF6F0; }
+  .data-table tr:hover td { background: var(--dirt-pale); }
+  .num-cell {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px;
+    color: var(--dirt);
+    text-align: center;
+  }
+  .highlight-cell {
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .rank-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .bar {
+    height: 6px;
+    background: var(--accent);
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  /* ─── CALLOUT ─── */
+  .callout {
+    border-left: 4px solid var(--accent);
+    background: linear-gradient(135deg, #FFF8EE, #FDF4E7);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    box-shadow: 0 2px 12px rgba(201,150,42,0.10);
+  }
+  .callout-title {
+    font-size: 12px;
+    letter-spacing: 2px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+  .callout p {
+    font-size: 14px;
+    margin-bottom: 0;
+    color: var(--text-sub);
+  }
+  .callout p + p { margin-top: 10px; }
+
+  /* ─── WARNING ─── */
+  .warning {
+    border-left: 4px solid #B85C5C;
+    background: #FFF5F5;
+    padding: 18px 22px;
+    margin-bottom: 28px;
+  }
+  .warning-title {
+    font-size: 11px;
+    letter-spacing: 2px;
+    font-weight: 700;
+    color: #B85C5C;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+  .warning p { font-size: 13px; margin-bottom: 0; color: #7A3030; }
+
+  /* ─── LIST ─── */
+  ul.styled, ol.styled {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 24px;
+  }
+  ul.styled li {
+    padding: 10px 0 10px 28px;
+    position: relative;
+    border-bottom: 1px dashed var(--border);
+    font-size: 14px;
+    color: var(--text-sub);
+    line-height: 1.7;
+  }
+  ul.styled li::before {
+    content: '▶';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+    font-size: 9px;
+    top: 14px;
+  }
+  ul.styled li:last-child { border-bottom: none; }
+  ul.styled li strong { color: var(--text-main); }
+
+  /* ─── RECENT RESULTS ─── */
+  .result-card {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 0;
+    border: 1px solid var(--border);
+    margin-bottom: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px var(--shadow);
+  }
+  .result-year {
+    background: var(--track);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px 8px;
+    color: var(--accent);
+    font-family: 'DM Serif Display', serif;
+  }
+  .result-year .y { font-size: 22px; line-height: 1; }
+  .result-year .r { font-size: 11px; color: rgba(245,235,224,0.5); margin-top: 4px; }
+  .result-body { padding: 16px 20px; background: var(--card); }
+  .result-row {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+  .result-place {
+    font-size: 11px;
+    font-weight: 700;
+    width: 22px;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+  .result-horse {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+  }
+  .result-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+  .result-cond {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border);
+  }
+
+  /* ─── GOLDEN 5 ─── */
+  .golden-list {
+    counter-reset: golden;
+  }
+  .golden-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .golden-item:last-child { border-bottom: none; }
+  .golden-num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 36px;
+    color: var(--accent-bright);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 36px;
+    opacity: 0.7;
+  }
+  .golden-text strong {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 4px;
+  }
+  .golden-text span {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+
+  /* ─── FOOTER NOTE ─── */
+  .footer-note {
+    margin-top: 60px;
+    padding: 28px 32px;
+    background: var(--track);
+    color: rgba(245,235,224,0.6);
+    font-size: 12px;
+    line-height: 1.8;
+  }
+  .footer-note strong { color: var(--accent); }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    text-align: center;
+    margin: 48px 0;
+    color: var(--border);
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    letter-spacing: 8px;
+  }
+
+  /* ─── INLINE HIGHLIGHT ─── */
+  .hl { color: var(--accent); font-weight: 700; }
+  .hl-danger { color: #B85C5C; font-weight: 700; }
+
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-label">TURF SIGNAL ／ RACE ANALYSIS 2026</div>
+  <h1 class="hero-title">
+    <em>羽田盃</em>（JpnI）<br>完全解説 2026
+  </h1>
+  <p class="hero-sub">レース構造 × 過去傾向 × 2026年攻略の統計的指針</p>
+  <div class="hero-badges">
+    <span class="badge badge-gold">第71回 2026年4月29日</span>
+    <span class="badge badge-white">大井競馬場 ダ右外1800m</span>
+    <span class="badge badge-white">3歳ダート三冠・第1冠</span>
+  </div>
+</div>
+
+<!-- SPEC -->
+<div class="spec-grid">
+  <div class="spec-item">
+    <div class="spec-label">施行日</div>
+    <div class="spec-value">2026年4月29日（祝水）</div>
+  </div>
+  <div class="spec-item">
+    <div class="spec-label">格付</div>
+    <div class="spec-value">JpnⅠ</div>
+  </div>
+  <div class="spec-item">
+    <div class="spec-label">距離</div>
+    <div class="spec-value">ダート右外1800m</div>
+  </div>
+  <div class="spec-item">
+    <div class="spec-label">1着賞金</div>
+    <div class="spec-value big">6,000万円</div>
+  </div>
+  <div class="spec-item">
+    <div class="spec-label">負担重量</div>
+    <div class="spec-value">定量 57kg<br><span style="font-size:12px;color:var(--text-muted)">牝馬2kg減</span></div>
+  </div>
+  <div class="spec-item">
+    <div class="spec-label">出走資格</div>
+    <div class="spec-value">3歳牡・牝<br><span style="font-size:12px;color:var(--text-muted)">騸馬不可</span></div>
+  </div>
+</div>
+
+<!-- 1. レース概要 -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h2 class="section-title">レース概要とポジショニング</h2>
+  </div>
+
+  <p>
+    羽田盃は<strong>3歳ダート三冠（羽田盃→東京ダービー→ジャパンダートクラシック）の第1冠</strong>として機能する最高格の古典路線。1956年に「大井盃」として創設、1964年に現名称に改称。長らく南関東公営競馬の3歳三冠第1冠だったが、<strong>2024年のダート競走体系整備によりJpnIに昇格</strong>し、JRAとの本格交流戦となった。
+  </p>
+
+  <p>
+    2024年以降の構造変化は大きい。斤量が牡馬56kg→<strong>57kg</strong>に増加、1着賞金が5,000万円→<strong>6,000万円（2026年）</strong>へと段階的に増額、JRA馬の参戦による質の変容が進んでいる。スタリオンシリーズにも指定され、2026年は優勝馬主に<strong>レイデオロ</strong>の種付け権が贈られる。
+  </p>
+
+  <div class="callout">
+    <div class="callout-title">POINT ／ 三冠ボーナス設計の重要性</div>
+    <p>羽田盃で地方馬上位3頭・JRA馬5着以内の上位3頭に<strong>東京ダービーの優先出走権</strong>が付与される。三冠を見据えた陣営は羽田盃を「仕上げのリトマス試験紙」として使う傾向があり、本番仕上げではなく様子見で出走するケースも存在する点を読み解く必要がある。</p>
+  </div>
+</div>
+
+<!-- 2. コース構造 -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h2 class="section-title">コース構造と脚質適性</h2>
+  </div>
+
+  <p>
+    <strong>大井競馬場・右回り外1800m。</strong>ホームストレッチからの発走で1周1,600mの大井外回りコースを1周＋200m。スタートから1コーナーまでが約300mと比較的短く、枠順によっては先行争いが激化しハイペース化するリスクを内包する。
+  </p>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num">386<span>m</span></div>
+      <div class="stat-desc">外回り直線距離<br>差し・追い込みに<br>対応できる長さ</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">300<span>m</span></div>
+      <div class="stat-desc">S〜1C間の距離<br>先行争いが<br>激化しやすい</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">16<span>頭</span></div>
+      <div class="stat-desc">フルゲート<br>外枠は統計的に<br>不利傾向あり</div>
+    </div>
+  </div>
+
+  <p>
+    直線386mは地方競馬場の中でも長く、単純な逃げ残りが成立しにくい構造。一方でスタート直後の短い直線区間では<strong>内枠の先行馬が最もコース取りで有利</strong>になる。枠順別の統計と脚質を組み合わせた多角的な判断が求められるコース。
+  </p>
+
+  <div class="callout">
+    <div class="callout-title">COURSE NOTE ／ 当日バイアスの重要性</div>
+    <p>大井の外回りコースは馬場状態によって差し有効度が大きく変動する。特に<strong>初日・馬場替わり直後</strong>はバイアスが安定しないため、当日の前半レースで芝・ダートそれぞれ1〜2本の傾向を確認してから判断を確定させるのが原則。</p>
+  </div>
+</div>
+
+<!-- 3. 枠番傾向 -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h2 class="section-title">枠番・馬番分析</h2>
+  </div>
+
+  <p>
+    全69回の統計で<strong>3枠が17勝</strong>とダントツのトップ。続いて5枠（11勝）、4枠・6枠（各10勝）と中枠群が勝率を独占している。馬番単位では<strong>3番（10勝）・4番（8勝）</strong>がホットゾーン。スタートから1コーナーまでの短区間でスムーズに先行態勢を築きやすい位置が優位に立つ構造がそのまま数字に表れている。
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>枠番</th>
+        <th>全69回勝利数</th>
+        <th>直近10年3着内率</th>
+        <th>評価</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="num-cell">3枠</td>
+        <td>
+          <div class="rank-bar">
+            <div class="bar" style="width:68px"></div>
+            <span class="highlight-cell">17勝</span>
+          </div>
+        </td>
+        <td class="highlight-cell">33.3%</td>
+        <td>◎ 最優良</td>
+      </tr>
+      <tr>
+        <td class="num-cell">5枠</td>
+        <td>
+          <div class="rank-bar">
+            <div class="bar" style="width:44px"></div>
+            11勝
+          </div>
+        </td>
+        <td>—</td>
+        <td>○</td>
+      </tr>
+      <tr>
+        <td class="num-cell">4枠</td>
+        <td>
+          <div class="rank-bar">
+            <div class="bar" style="width:40px"></div>
+            10勝
+          </div>
+        </td>
+        <td>—</td>
+        <td>○</td>
+      </tr>
+      <tr>
+        <td class="num-cell">6枠</td>
+        <td>
+          <div class="rank-bar">
+            <div class="bar" style="width:40px"></div>
+            10勝
+          </div>
+        </td>
+        <td>—</td>
+        <td>○</td>
+      </tr>
+      <tr>
+        <td class="num-cell">7枠</td>
+        <td>—</td>
+        <td style="color:#B85C5C;font-weight:700">5.3%連対率</td>
+        <td style="color:#B85C5C">△ 外枠不利</td>
+      </tr>
+      <tr>
+        <td class="num-cell">8枠</td>
+        <td>—</td>
+        <td style="color:#B85C5C;font-weight:700">5.3%連対率</td>
+        <td style="color:#B85C5C">△ 外枠不利</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="warning">
+    <div class="warning-title">CAUTION ／ 外枠の統計的ボトルネック</div>
+    <p>直近10年の7枠・8枠は連対率が各5.3%と極端に低い。大井1,800m特有のスタート後の短い直線が外枠馬のポジション取りを構造的に不利にしている。外枠の有力馬については「実力によるオーバーライド」の余地を慎重に検討する必要がある。</p>
+  </div>
+</div>
+
+<!-- 4. 人気別 -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2 class="section-title">人気別成績と上位人気の信頼度</h2>
+  </div>
+
+  <p>
+    羽田盃は上位人気が圧倒的に信頼できるレースとして知られる。全69回で<strong>3番人気以内の馬が勝利した回数は58回（約84%）</strong>。直近10年に絞ると1番人気の勝率は50.0%に達し、1〜2番人気のワンツー決着が戦略上の基盤となる。
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>人気</th>
+        <th>勝率</th>
+        <th>連対率</th>
+        <th>3着内率</th>
+        <th>評価</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="num-cell highlight-cell">1番人気</td>
+        <td class="highlight-cell">50.0%</td>
+        <td class="highlight-cell">70.0%</td>
+        <td class="highlight-cell">80.0%</td>
+        <td>◎ 軸最有力</td>
+      </tr>
+      <tr>
+        <td class="num-cell">2番人気</td>
+        <td>10.0%</td>
+        <td>50.0%</td>
+        <td>60.0%</td>
+        <td>○ 複軸</td>
+      </tr>
+      <tr>
+        <td class="num-cell">3番人気</td>
+        <td>0.0%</td>
+        <td>10.0%</td>
+        <td>20.0%</td>
+        <td>▲ 警戒低め</td>
+      </tr>
+      <tr>
+        <td class="num-cell">4番人気</td>
+        <td>20.0%</td>
+        <td>30.0%</td>
+        <td>50.0%</td>
+        <td>△ 過去に穴</td>
+      </tr>
+      <tr>
+        <td class="num-cell">5番人気</td>
+        <td>10.0%</td>
+        <td>10.0%</td>
+        <td>10.0%</td>
+        <td>— 低信頼</td>
+      </tr>
+      <tr>
+        <td class="num-cell" style="color:#B85C5C">6番人気↓</td>
+        <td style="color:#B85C5C">1.1%</td>
+        <td style="color:#B85C5C">3.4%</td>
+        <td style="color:#B85C5C">9.0%</td>
+        <td style="color:#B85C5C">× 激走レア</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p>
+    注目すべきは<strong>4番人気の3着内率50.0%</strong>という数字。1〜2番人気と比べると勝率・連対率は見劣りするが、「3着に粘る」確率が高い点は3連複・3連単の3着枠候補として評価に値する。逆に3番人気は過去10年で1着ゼロ、勝率0.0%と盲点的なデータを示す。
+  </p>
+
+  <div class="callout">
+    <div class="callout-title">INSIGHT ／ JpnI昇格による人気構造の変容</div>
+    <p>2024年以降のJRA参戦により、地方有力馬のオッズが相対的に過小評価されるリスクと、JRA上位馬が人気を集めすぎるリスクが同時に発生している。過去10年の地方勢9勝・JRA勢1勝というベースラインは昇格前のサンプルが多く、2026年以降の予測には注意深い補正が必要。</p>
+  </div>
+</div>
+
+<!-- 5. ステップレース -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h2 class="section-title">ステップレース分析</h2>
+  </div>
+
+  <p>
+    羽田盃への主要ルートとして機能するトライアルは複数存在するが、統計上の「質」には大きな差がある。
+  </p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ステップレース</th>
+        <th>格</th>
+        <th>勝率（直近10年）</th>
+        <th>3着内率</th>
+        <th>評価</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>雲取賞</strong></td>
+        <td>JpnIII</td>
+        <td class="highlight-cell">50.0%</td>
+        <td class="highlight-cell">66.7%</td>
+        <td>◎ 最有力</td>
+      </tr>
+      <tr>
+        <td><strong>京浜盃</strong></td>
+        <td>JpnII</td>
+        <td>6.9%</td>
+        <td>27.6%</td>
+        <td>○ 最大母数</td>
+      </tr>
+      <tr>
+        <td>ブルーバードカップ</td>
+        <td>JpnIII</td>
+        <td>—</td>
+        <td>—</td>
+        <td>△</td>
+      </tr>
+      <tr>
+        <td style="color:#B85C5C">クラウンカップ</td>
+        <td>—</td>
+        <td style="color:#B85C5C">0.0%</td>
+        <td style="color:#B85C5C">4.8%</td>
+        <td style="color:#B85C5C">× 統計上軽視</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <ul class="styled">
+    <li><strong>雲取賞組が最有力。</strong>サンプル（n=6）は小さいが、3頭が羽田盃を勝利、3着内率66.7%は圧倒的。大井ダート1800mをすでに経験している共通点も大きい。</li>
+    <li><strong>京浜盃は「量の王道」。</strong>出走58頭中4勝、3着内率27.6%。出走数が最多で、多様な馬の「資格証明」として機能する。ただし個体差の峻別が最重要。</li>
+    <li><strong>クラウンカップ経由は統計上危険。</strong>21頭参戦で勝利ゼロ。羽田盃への適性・仕上がりのピークが合っていないケースが多い可能性。</li>
+  </ul>
+</div>
+
+<!-- 6. 馬・人的因子 -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h2 class="section-title">馬属性・人的因子の傾向</h2>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-num" style="font-size:28px">490<span style="font-size:14px">〜</span>500<span style="font-size:14px">kg</span></div>
+      <div class="stat-desc">理想馬格ゾーン<br>大型牡馬に<br>勝率が集中</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">5<span style="font-size:16px">頭</span></div>
+      <div class="stat-desc">歴代牝馬優勝<br>直近10年は<br>牡馬が全勝</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">7<span style="font-size:16px">頭</span></div>
+      <div class="stat-desc">無敗での制覇<br>「パーフェクト馬」<br>は最上級評価</div>
+    </div>
+  </div>
+
+  <p>
+    馬格は<strong>490kg台・500kg台</strong>が中心で、大井ダートのパワー要求に応える大型体型が優位。負担重量は56kgが多数を占めるが、57kg背負いでも勝率14.3%・3着内率28.6%と、実績相応の斤量は好走阻害にはなっていない。
+  </p>
+
+  <p><strong>性別：</strong>直近10年の勝ち馬はすべて牡馬。歴代69回で牝馬優勝はハルセキト・コーナンルビー・ロジータ・カシワズプリンセス・クラーベセクレタの5頭のみ。牝馬が勝つ条件は相当な傑出度が必要と考えるべき。</p>
+
+  <p><strong>無敗馬の歴史：</strong>ホスピタリテイ・シナノデービス・ブルーフアミリー・キャニオンロマン・イエローパワー・トーシンブリザード・ミックファイアの7頭が無敗で制覇。無敗馬が出走する場合は歴史的価値も含め最上級の評価を要する。</p>
+
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>騎手</th>
+        <th>連対率（直近10年）</th>
+        <th>3着内率</th>
+        <th>備考</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>森泰斗</strong></td>
+        <td class="highlight-cell">60.0%</td>
+        <td class="highlight-cell">60.0%</td>
+        <td>外す理由なし</td>
+      </tr>
+      <tr>
+        <td><strong>御神本訓史</strong></td>
+        <td>—</td>
+        <td>50.0%<br><span style="font-size:11px">勝率33.3%</span></td>
+        <td>決定力高い</td>
+      </tr>
+      <tr>
+        <td>JRA・川田将雅</td>
+        <td>—</td>
+        <td>100%<br><span style="font-size:11px;color:#B85C5C">n=1</span></td>
+        <td>サンプル極小</td>
+      </tr>
+      <tr>
+        <td>JRA・横山武史</td>
+        <td>100%<br><span style="font-size:11px;color:#B85C5C">n=1</span></td>
+        <td>—</td>
+        <td>サンプル極小</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <table class="data-table" style="margin-top:0">
+    <thead>
+      <tr>
+        <th>調教師</th>
+        <th>勝利数（直近10年）</th>
+        <th>勝率・連対率</th>
+        <th>備考</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>矢野義幸</strong></td>
+        <td class="highlight-cell">3勝</td>
+        <td class="highlight-cell">60.0% / 60.0%</td>
+        <td>本レース特異的適性</td>
+      </tr>
+      <tr>
+        <td>小久保智</td>
+        <td>—</td>
+        <td>3着内率30.0%</td>
+        <td>出走数最多・軽視禁物</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="warning">
+    <div class="warning-title">CAUTION ／ JRA騎手データの取り扱い</div>
+    <p>川田将雅・横山武史のデータはn=1の極小サンプル。「100%」という数字をそのまま信頼することは統計的に不適切。個別の馬質を最優先に評価すること。</p>
+  </div>
+</div>
+
+<!-- 7. 過去5年の結果 -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">07</span>
+    <h2 class="section-title">直近2年の競走成績</h2>
+  </div>
+
+  <div class="result-card">
+    <div class="result-year">
+      <div class="y">2025</div>
+      <div class="r">第70回</div>
+    </div>
+    <div class="result-body">
+      <div class="result-row">
+        <span class="result-place">1着</span>
+        <span class="result-horse">ナチュラルライズ</span>
+        <span class="result-meta">1:52.1 ／ 1人気</span>
+      </div>
+      <div class="result-row">
+        <span class="result-place">2着</span>
+        <span class="result-horse">ナイトオブファイア</span>
+        <span class="result-meta">4人気</span>
+      </div>
+      <div class="result-row">
+        <span class="result-place">3着</span>
+        <span class="result-horse">ジャナドリア</span>
+        <span class="result-meta">2人気</span>
+      </div>
+      <div class="result-cond">天候：晴 ／ 馬場：重 ／ JRA馬（美浦・横山武史騎乗）が制覇</div>
+    </div>
+  </div>
+
+  <div class="result-card">
+    <div class="result-year">
+      <div class="y">2024</div>
+      <div class="r">第69回</div>
+    </div>
+    <div class="result-body">
+      <div class="result-row">
+        <span class="result-place">1着</span>
+        <span class="result-horse">アマンテビアンコ</span>
+        <span class="result-meta">1:53.9 ／ 1人気</span>
+      </div>
+      <div class="result-row">
+        <span class="result-place">2着</span>
+        <span class="result-horse">アンモシエラ</span>
+        <span class="result-meta">4人気</span>
+      </div>
+      <div class="result-row">
+        <span class="result-place">3着</span>
+        <span class="result-horse">フロインフォッサル</span>
+        <span class="result-meta">8人気</span>
+      </div>
+      <div class="result-cond">天候：雨 ／ 馬場：不良 ／ JpnI昇格初年度。JRA（美浦・川田将雅）が制覇。8番人気が3着に入る荒れ模様</div>
+    </div>
+  </div>
+
+  <p>
+    JpnI昇格後の2年はともに<strong>JRA馬が1番人気で制覇</strong>。昇格前の「地方勢9勝・JRA勢1勝」という過去10年統計は、2024〜2025年のデータによって急速に更新されつつある。2024年は8番人気の3着という荒れも発生し、馬場状態（不良）と外枠不利が複合した可能性がある。
+  </p>
+</div>
+
+<!-- 8. 歴史的記録 -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">08</span>
+    <h2 class="section-title">歴史と主な記録</h2>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-year">1956年</div>
+      <div class="timeline-text">「大井盃」として創設。ダート1800m。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1964年</div>
+      <div class="timeline-text">「羽田盃」に改称（第9回から）。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1995年</div>
+      <div class="timeline-text">南関東地区グレード制施行によりG1格付け。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">1996〜2004年</div>
+      <div class="timeline-text">1800m→1600m→1790m→1800mと距離が変動。現行1800mは2004年から。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2024年</div>
+      <div class="timeline-text">ダート三冠体系整備によりJpnIに昇格。「農林水産大臣賞典 羽田盃」に正式改称。JRA交流戦が本格化。売上記録13.7億円を計上。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2025年</div>
+      <div class="timeline-text">売上21.5億円でレコード更新（前年比1.6倍）。JRA参戦効果が売上面でも顕著に。</div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-year">2026年</div>
+      <div class="timeline-text">1着賞金が6,000万円に増額（前年5,000万円）。スタリオン対象種牡馬はレイデオロ。</div>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:28px">
+    <div class="callout-title">RECORDS ／ 主な歴代記録</div>
+    <p>
+      <strong>最多勝利騎手</strong>：赤間清松（7勝）<br>
+      <strong>最多勝利調教師</strong>：出川己代造（7勝）<br>
+      <strong>最多勝利種牡馬</strong>：パイロ（3勝：第61・64・67回）<br>
+      <strong>現行距離（1800m）レコード</strong>：ミックファイア・1:50.9（第68回・2023年）<br>
+      <strong>最多連覇騎手</strong>：石崎隆之（4連覇：第45〜48回）<br>
+      <strong>調教師最多連覇</strong>：矢野義幸（2連覇：第63・64回）
+    </p>
+  </div>
+</div>
+
+<div class="divider">— — ◆ — —</div>
+
+<!-- 9. 2026年攻略指針 -->
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">09</span>
+    <h2 class="section-title">2026年攻略の統計的指針</h2>
+  </div>
+
+  <p>以上のデータを統合して導かれる2026年の羽田盃攻略における優先確認事項を整理する。最終判断はあくまで当日の個体評価と馬場バイアス確認を経て下すこと。</p>
+
+  <div class="golden-list">
+    <div class="golden-item">
+      <div class="golden-num">1</div>
+      <div class="golden-text">
+        <strong>1〜2番人気への信頼を基本軸に</strong>
+        <span>直近10年1番人気の勝率50%・3着内率80%は馬券構成の土台。上位人気2頭のワンツー決着（全69回で33回）が最頻出パターン。まず上位人気の実力を精査することが最優先。</span>
+      </div>
+    </div>
+    <div class="golden-item">
+      <div class="golden-num">2</div>
+      <div class="golden-text">
+        <strong>3枠・中枠（馬番3〜4番）を最優先評価</strong>
+        <span>全69回で3枠17勝。外枠（7〜8枠）の連対率は各5.3%と低く、外枠の有力馬は「外枠ハンデ」を加味した評価が必要。馬番3・4番のホットゾーンは統計的に確立された事実。</span>
+      </div>
+    </div>
+    <div class="golden-item">
+      <div class="golden-num">3</div>
+      <div class="golden-text">
+        <strong>雲取賞組を最優先ステップとして評価</strong>
+        <span>勝率50%・3着内率66.7%は群を抜く数字。大井1,800mの経験という適性面の裏付けも一致。京浜盃組は最大母数だが個体差の峻別が必須。クラウンカップ経由は統計上軽視。</span>
+      </div>
+    </div>
+    <div class="golden-item">
+      <div class="golden-num">4</div>
+      <div class="golden-text">
+        <strong>490〜500kg台の大型牡馬を好評価</strong>
+        <span>大井ダートのパワー要求に対応できる馬格帯。牝馬は69回で5頭のみ優勝という稀少性を考慮。ただしクラーベセクレタ（2011年・船橋・川島正行厩舎）のような例外には個別対応。</span>
+      </div>
+    </div>
+    <div class="golden-item">
+      <div class="golden-num">5</div>
+      <div class="golden-text">
+        <strong>JRA勢の質量増加というパラダイムシフトを織り込む</strong>
+        <span>2024〜2025年の連続JRA馬制覇は、過去の「地方9勝・JRA1勝」という統計の更新を示唆。2026年も双方の実力を等価に比較する視点が求められる。地方有力馬のオッズ妙味を逃さないためにも両陣営の出来を個別評価することが重要。</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="warning" style="margin-top:28px">
+    <div class="warning-title">CAUTION ／ 「統計」は参照指標、判断は個体評価で</div>
+    <p>本レポートの全統計は過去の集計値であり、予測の確率的参照に使うもの。特にJpnI昇格後はサンプルが2年分しかなく「新体制の傾向」は確立されていない。当日の馬場バイアス・個体のコンディション・オッズ断層の三軸を加えた総合判断が最終決定を左右する。</p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer-note">
+  <strong>TURF SIGNAL</strong> ／ 芝とダートの向こう側へ<br>
+  本記事は競馬情報の分析・記録を目的とした教育的コンテンツです。馬券購入は各自の判断と責任において行ってください。<br>
+  <span style="opacity:0.5">データ出典：Wikipedia「羽田盃」/ ダートグレード競走特設サイト（keiba.go.jp）/ 羽田盃（JpnI）傾向分析レポート</span>
+</div>
+
+</body>
+</html>
