@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 ケンタッキーダービー 分析レポート</title>
+<style>
+  body {
+    font-family: 'Georgia', 'Noto Serif JP', serif;
+    background: #0d0d0d;
+    color: #e8e0d0;
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    line-height: 1.85;
+    font-size: 15px;
+  }
+  h1 {
+    font-size: 2em;
+    font-weight: 900;
+    letter-spacing: 0.05em;
+    border-bottom: 3px solid #c8a84b;
+    padding-bottom: 12px;
+    margin-bottom: 6px;
+    color: #f0e0a0;
+  }
+  .subtitle {
+    color: #a89060;
+    font-size: 0.95em;
+    margin-bottom: 36px;
+  }
+  h2 {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: #c8a84b;
+    border-left: 4px solid #c8a84b;
+    padding-left: 12px;
+    margin-top: 44px;
+    margin-bottom: 14px;
+    letter-spacing: 0.04em;
+  }
+  h3 {
+    font-size: 1em;
+    font-weight: 700;
+    color: #d4b870;
+    margin-top: 22px;
+    margin-bottom: 8px;
+  }
+  .race-info {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 6px;
+    padding: 18px 22px;
+    margin-bottom: 32px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 32px;
+    font-size: 0.9em;
+  }
+  .race-info span { color: #888; }
+  .race-info strong { color: #e8e0d0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88em;
+    margin: 16px 0 28px;
+  }
+  th {
+    background: #1e1a10;
+    color: #c8a84b;
+    padding: 8px 10px;
+    text-align: center;
+    font-weight: 700;
+    border: 1px solid #333;
+  }
+  td {
+    padding: 7px 10px;
+    border: 1px solid #2a2a2a;
+    text-align: center;
+    color: #d0c8b8;
+  }
+  tr:nth-child(even) td { background: #141414; }
+  tr:hover td { background: #1e1c14; }
+  .highlight { color: #f0c040; font-weight: 700; }
+  .neg { color: #e06060; }
+  .pos { color: #60c060; }
+
+  /* 馬カード */
+  .horse-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-top: 12px;
+  }
+  .horse-card {
+    background: #161610;
+    border: 1px solid #2e2a1e;
+    border-radius: 6px;
+    padding: 14px 16px;
+  }
+  .horse-card .name {
+    font-size: 1.05em;
+    font-weight: 700;
+    color: #f0e0a0;
+    margin-bottom: 4px;
+  }
+  .horse-card .record {
+    font-size: 0.8em;
+    color: #888;
+    margin-bottom: 8px;
+  }
+  .horse-card .desc {
+    font-size: 0.85em;
+    line-height: 1.7;
+    color: #c0b8a8;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 0.75em;
+    padding: 2px 7px;
+    border-radius: 3px;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+  .tag-jap { background: #2a1a00; color: #d4862a; border: 1px solid #5a3a10; }
+  .tag-fla { background: #0a2a0a; color: #60c060; border: 1px solid #1a5a1a; }
+  .tag-ark { background: #0a1a2a; color: #60a0e0; border: 1px solid #1a3a5a; }
+  .tag-uae { background: #1a0a2a; color: #a060e0; border: 1px solid #3a1a5a; }
+  .tag-oth { background: #1a1a1a; color: #a0a0a0; border: 1px solid #3a3a3a; }
+
+  .section-box {
+    background: #141410;
+    border: 1px solid #2a2620;
+    border-radius: 6px;
+    padding: 18px 20px;
+    margin: 14px 0;
+  }
+  .scenario {
+    border-left: 3px solid #c8a84b;
+    padding-left: 14px;
+    margin: 16px 0;
+  }
+  .scenario-label {
+    font-weight: 700;
+    color: #c8a84b;
+    margin-bottom: 4px;
+  }
+  .gate-badge {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    border-radius: 4px;
+    background: #2a2416;
+    color: #c8a84b;
+    font-weight: 700;
+    font-size: 0.85em;
+    margin-right: 6px;
+  }
+  .gate-bad { background: #2a1414; color: #e06060; }
+  .gate-good { background: #142a14; color: #60c060; }
+
+  hr { border: none; border-top: 1px solid #2a2a2a; margin: 32px 0; }
+  p { margin: 10px 0; }
+
+  .conclusion {
+    background: #1a1608;
+    border: 2px solid #c8a84b;
+    border-radius: 8px;
+    padding: 22px 24px;
+    margin-top: 40px;
+  }
+  .conclusion h2 { margin-top: 0; }
+
+  .japan-box {
+    background: #1a1200;
+    border: 1px solid #5a3a10;
+    border-radius: 6px;
+    padding: 16px 18px;
+    margin: 16px 0;
+  }
+  .japan-box .horse-name {
+    font-size: 1.1em;
+    font-weight: 700;
+    color: #d4862a;
+    margin-bottom: 6px;
+  }
+
+  @media (max-width: 600px) {
+    .horse-grid { grid-template-columns: 1fr; }
+    .race-info { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>🌹 2026 ケンタッキーダービー 分析レポート</h1>
+<div class="race-info">
+  <div><span>開催日時</span><br><strong>2026年5月3日（日）07:57 JST</strong></div>
+  <div><span>競馬場</span><br><strong>チャーチルダウンズ競馬場（アメリカ）</strong></div>
+  <div><span>条件</span><br><strong>ダート左2000m・3歳・G1</strong></div>
+  <div><span>負担重量</span><br><strong>牡・セン 57kg ／ 牝 55kg</strong></div>
+  <div><span>賞金総額</span><br><strong>500万米ドル（約7億7500万円）</strong></div>
+  <div><span>1着賞金</span><br><strong>310万米ドル（約4億8050万円）</strong></div>
+</div>
+
+<hr>
+
+<h2>① レースの構造分析</h2>
+
+<div class="section-box">
+<h3>アメリカダートの基本特性</h3>
+<p>チャーチルダウンズのダートは砂が深く重いパワー型馬場。1000m通過が日本比1〜2秒速い先行争いが展開し、キックバック（砂被り）は強烈。コーナーはきつくイン有利、直線が短いため差し馬は物理的に届きにくい。勝負は3〜4角で決まる"早め仕掛け"のレース。</p>
+<p><strong>結論：</strong>先行力・パワー・キックバック耐性の3点が揃わないと馬券圏内は難しい。差し一辺倒の馬は基本消し評価。</p>
+</div>
+
+<h3>今年のレース背景</h3>
+<p>2歳王者テッドノフィーが骨挫傷、筆頭評価パラディンが骨折と有力馬の戦線離脱が相次ぎ、例年以上の混戦模様。近年は当日1番人気が<span class="neg">7連敗中</span>（2022リッチストライク95倍、2023メイジが重賞未勝利から優勝）と波乱傾向が強く、伏兵台頭が十分あり得る構造。</p>
+
+<hr>
+
+<h2>② ゲート番別傾向</h2>
+
+<table>
+  <thead>
+    <tr><th>ゲート</th><th>勝率</th><th>連対率</th><th>3着内率</th><th>判定</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>1</td><td>0%</td><td>10%</td><td>10%</td><td class="neg">✕ 1986年以来未勝利</td></tr>
+    <tr><td>4</td><td>0%</td><td>0%</td><td>0%</td><td class="neg">✕ 最凶</td></tr>
+    <tr><td>5</td><td>10%</td><td>10%</td><td>30%</td><td class="pos">○</td></tr>
+    <tr><td><strong>7</strong></td><td class="highlight">20%</td><td class="highlight">30%</td><td class="highlight">40%</td><td class="pos">◎ 最多2勝</td></tr>
+    <tr><td><strong>20</strong></td><td class="highlight">33.3%</td><td class="highlight">33.3%</td><td class="highlight">33.3%</td><td class="pos">◎ 最多2勝</td></tr>
+    <tr><td>17</td><td>0%</td><td>0%</td><td>0%</td><td class="neg">✕ 史上未勝利</td></tr>
+    <tr><td>18</td><td>0%</td><td>0%</td><td>0%</td><td class="neg">✕</td></tr>
+    <tr><td>6</td><td>0%</td><td>10%</td><td>10%</td><td class="neg">✕ 勝率2.1%（1993年以来未勝利）</td></tr>
+  </tbody>
+</table>
+
+<p>直近15回は13番枠より外の馬が9勝。外枠が絶対不利とは言えない一方、1番・4番・17番・18番の不振は統計的に明確。今年の主要人気馬のゲート配置：</p>
+<p>
+  <span class="gate-bad gate-badge">1</span>レネゲイド（1番人気）
+  <span class="gate-bad gate-badge">6</span>コマンドメント（2番人気タイ）
+  <span class="gate-bad gate-badge">17</span>ファーザーアドゥ（2番人気タイ）
+  <span class="gate-good gate-badge">9</span>ザプーマ（5番人気）
+  <span class="gate-good gate-badge">7</span>チーフワラビー（4番人気）※要確認
+</p>
+
+<hr>
+
+<h2>③ 前走レース別傾向</h2>
+
+<table>
+  <thead>
+    <tr><th>前走レース</th><th>1着</th><th>2着</th><th>3着</th><th>合計</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="highlight">フロリダダービー（米G1）</td><td class="highlight">4</td><td>1</td><td>1</td><td class="highlight">6</td></tr>
+    <tr><td>アーカンソーダービー（米G1）</td><td>2</td><td>1</td><td>1</td><td>4</td></tr>
+    <tr><td>サンタアニタダービー（米G1）</td><td>1</td><td>2</td><td>2</td><td>5</td></tr>
+    <tr><td>ルイジアナダービー（米G2）</td><td>1</td><td>2</td><td>1</td><td>4</td></tr>
+    <tr><td>ブルーグラスS（米G1）</td><td>0</td><td>2</td><td>3</td><td>5</td></tr>
+    <tr><td>ジェフルビーS（米G3）</td><td>1</td><td>1</td><td>0</td><td>2</td></tr>
+    <tr><td>UAEダービー（首G2）</td><td>0</td><td>0</td><td>1</td><td>1</td></tr>
+  </tbody>
+</table>
+<p>フロリダダービー経由が4勝でダントツ1位。今年の出走馬ではコマンドメント（フロリダD1着）・チーフワラビー（フロリダD3着）・ザプーマ（フロリダDハナ差2着）が該当。</p>
+
+<hr>
+
+<h2>④ 出走馬 評価一覧</h2>
+
+<h3>上位人気グループ（アメリカ勢）</h3>
+<div class="horse-grid">
+  <div class="horse-card">
+    <div class="name">レネゲイド</div>
+    <div class="record">5戦2勝 [2-2-1-0]</div>
+    <span class="tag tag-ark">アーカンソーD1着</span>
+    <div class="desc">
+      名手I.オルティスJr.騎手が複数の手駒から選択。アーカンソーDを4馬身差圧勝。ただし<strong class="neg">1番枠</strong>は1986年以来未勝利、同騎手もKYD過去9回騎乗で3着以内なし。前走は8頭立て→倍以上の頭数増で序盤ポジション取りが最大の課題。
+    </div>
+  </div>
+  <div class="horse-card">
+    <div class="name">ファーザーアドゥ</div>
+    <div class="record">6戦3勝 [3-1-1-1]</div>
+    <span class="tag tag-oth">ブルーグラスS 11馬身差</span>
+    <div class="desc">
+      チャーチルダウンズで2歳時に重賞勝ち実績あり。前走圧勝もオルティスJr.騎手はレネゲイドを選択。KYD現役最多3勝のJ.ヴェラスケス騎手を確保。<strong class="neg">17番枠</strong>は史上未勝利の最凶枠。
+    </div>
+  </div>
+  <div class="horse-card">
+    <div class="name">コマンドメント</div>
+    <div class="record">5戦4勝 [4-0-0-1]</div>
+    <span class="tag tag-fla">フロリダD1着</span>
+    <div class="desc">
+      前哨戦シリーズ最高点150点でG1最多勝利数。チャーチルダウンズで初勝利の実績も持つ。<strong class="neg">6番枠</strong>は勝率2.1%、1993年以来未勝利。騎手もサエス騎手に乗り替わり。
+    </div>
+  </div>
+  <div class="horse-card">
+    <div class="name">チーフワラビー</div>
+    <div class="record">3戦1勝 [1-1-1-0]</div>
+    <span class="tag tag-fla">フロリダD3着</span>
+    <div class="desc">
+      ファウンテンオブユースS2着・フロリダD3着とコマンドメントに接戦。ブリンカー試装着で変わり身狙い。前走での集中力欠如を矯正できれば逆転も。前走KYD連覇狙いW.モット調教師。
+    </div>
+  </div>
+  <div class="horse-card">
+    <div class="name">ザプーマ</div>
+    <div class="record">4戦1勝 [1-2-1-0]</div>
+    <span class="tag tag-fla">フロリダDハナ差2着</span>
+    <div class="desc">
+      タンパベイDでファーザーアドゥを下す実績。<strong class="pos">9番枠</strong>はJ.カステリャーノ騎手（2023年KYD制覇の8番枠から隣の9番枠）と景色が変わらない好条件。前走内容から上位互角評価が必要。
+    </div>
+  </div>
+  <div class="horse-card">
+    <div class="name">ソーハッピー</div>
+    <div class="record">4戦3勝 [3-0-1-0]</div>
+    <span class="tag tag-oth">サンタアニタD1着</span>
+    <div class="desc">
+      M.スミス騎手が抑えて運んだ前走で力強い差し脚。カリフォルニア馬は軽視されがちだが、昨年サンタアニタDワンツーが本番でも好走した実績がある。距離延長のメドは立てた。
+    </div>
+  </div>
+</div>
+
+<h3>伏兵グループ（アメリカ勢）</h3>
+<div class="horse-grid">
+  <div class="horse-card">
+    <div class="name">エマージングマーケット</div>
+    <div class="record">2戦2勝 [2-0-0-0]</div>
+    <span class="tag tag-oth">ルイジアナD1着</span>
+    <div class="desc">
+      2月7日デビューのキャリア2戦。底を見せていないが、2戦でのKYD優勝は1883年以来143年ぶりの記録への挑戦。F.プラ騎手は先約でサエス騎手へ乗り替わり。
+    </div>
+  </div>
+  <div class="horse-card">
+    <div class="name">フルエフォート</div>
+    <div class="record">7戦3勝 [3-2-1-1]</div>
+    <span class="tag tag-oth">ジェフルビーS1着</span>
+    <div class="desc">
+      <strong class="neg">今回が初ダート</strong>。ただし2011年アニマルキングダムも初ダートでKYD制覇、リッチストライク・2023年2着トゥーフィルズも同臨戦経由。19番枠（リッチストライクは20番枠から激走）。
+    </div>
+  </div>
+  <div class="horse-card">
+    <div class="name">ゴールデンテンポ</div>
+    <div class="record">4戦2勝 [2-0-2-0]</div>
+    <span class="tag tag-oth">ルコントS1着</span>
+    <div class="desc">
+      戦ってきた相手関係から変わり身の余地あり。末脚は確かだが展開の助けが欲しいタイプ。速い流れになってこそ。
+    </div>
+  </div>
+  <div class="horse-card">
+    <div class="name">アルバス</div>
+    <div class="record">4戦2勝 [2-0-1-1]</div>
+    <span class="tag tag-oth">ウッドメモリアルS1着</span>
+    <div class="desc">
+      差し切り勝ちで浮上。前走の価値は高いが、本番で同じ差し脚を再現できるかが試金石。
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<h2>⑤ 日本馬の適性評価</h2>
+
+<div class="japan-box">
+  <div class="horse-name">🇯🇵 ダノンバーボン｜3戦3勝 [3-0-0-0]</div>
+  <table style="margin:10px 0 0;">
+    <tr><th>評価項目</th><th>判定</th><th>根拠</th></tr>
+    <tr><td>血統適性</td><td class="pos">◎</td><td>米国産（ケンタッキー生まれ）・アメリカ血統</td></tr>
+    <tr><td>先行力</td><td>△</td><td>ワンサイドの圧勝続きで先行争い経験不足</td></tr>
+    <tr><td>距離適性</td><td class="neg">△</td><td>母系がスプリンターに偏りあり・激流2000m対応が未知</td></tr>
+    <tr><td>馬格</td><td>要確認</td><td>データ未入手（500kg以上かどうか）</td></tr>
+    <tr><td>経験</td><td class="neg">✕</td><td>厳しいレース経験なし・初遠征</td></tr>
+    <tr><td>騎手</td><td>△</td><td>不明（記事記載なし）</td></tr>
+    <tr><td>人気</td><td>—</td><td>8番人気タイ（モーニングライン）</td></tr>
+  </table>
+  <p style="margin-top:10px; font-size:0.9em; color:#c0a870;">
+    <strong>評価：</strong>血統適性は担保されているが、厳しいレース経験ゼロ・母系スプリンター偏りの距離不安・初遠征という3つの✕が重なる。底を見せていない点は魅力だが、軸として使うには根拠が薄い。<strong class="pos">紐候補止まり</strong>（状態・馬格情報次第で見直し余地あり）。
+  </p>
+</div>
+
+<div class="japan-box">
+  <div class="horse-name">🇯🇵 ワンダーディーン｜6戦2勝 [2-2-0-2]</div>
+  <table style="margin:10px 0 0;">
+    <tr><th>評価項目</th><th>判定</th><th>根拠</th></tr>
+    <tr><td>血統適性</td><td>△</td><td>日本調教馬</td></tr>
+    <tr><td>先行力</td><td class="pos">◎</td><td>UAEダービーで軽快に先行してねじ伏せ快勝</td></tr>
+    <tr><td>距離適性</td><td class="pos">○</td><td>ダート1800m以上で連対維持・距離延長対応済み</td></tr>
+    <tr><td>経験値</td><td class="pos">◎</td><td>6戦全て異なる競馬場×異なる騎手で崩れず</td></tr>
+    <tr><td>騎手</td><td class="pos">○</td><td>坂井瑠星（フォーエバーヤングKYD3着の実績）</td></tr>
+    <tr><td>前走</td><td class="pos">○</td><td>UAEダービー → KYD（過去に3着実績あり）</td></tr>
+    <tr><td>人気</td><td class="pos">◎</td><td>ダノンバーボン以下の人気薄→断層あり</td></tr>
+  </table>
+  <p style="margin-top:10px; font-size:0.9em; color:#c0a870;">
+    <strong>評価：</strong>日本馬の中では明確に上位評価。坂井瑠星騎手はフォーエバーヤング（KYD3着）とのコンビで米国強豪と戦った実績あり、これは大きなプラス。UAEダービーからのKYD経由は過去に3着馬あり（2024年フォーエバーヤング）。先行できる脚質とキックバック耐性も期待できる。人気薄からの<strong class="pos">穴候補筆頭</strong>。
+  </p>
+</div>
+
+<hr>
+
+<h2>⑥ 展開シナリオ分析</h2>
+
+<div class="scenario">
+  <div class="scenario-label">パターンA：先行馬決着（標準シナリオ）</div>
+  <p>前半から激しい先行争い。コマンドメント・レネゲイドあたりが主導権争い。ワンダーディーンは先行グループに入れる位置から3〜4角で勝負。先行力のある馬が押し切る典型的なアメリカダート決着。<br><strong>恩恵：</strong>コマンドメント、ザプーマ、チーフワラビー、ワンダーディーン</p>
+</div>
+
+<div class="scenario">
+  <div class="scenario-label">パターンB：ハイペース差し届くシナリオ（荒れパターン）</div>
+  <p>先行勢が潰し合い、中団以降から差し馬台頭。ただしアメリカダートの直線の短さから「完全な差し切り」は難しく、中団前目から動ける馬限定。<br><strong>恩恵：</strong>ソーハッピー、アルバス、フルエフォート（初ダートで台頭も）</p>
+</div>
+
+<div class="scenario">
+  <div class="scenario-label">パターンC：大波乱シナリオ（近年トレンド）</div>
+  <p>当日1番人気7連敗中・混戦模様という条件が揃い、二桁人気馬が絡む大波乱。リッチストライク（95倍）タイプの台頭。ゴールデンテンポ・フルエフォート・ワンダーディーン等の伏兵が浮上する。<br><strong>根拠：</strong>有力馬2頭離脱→混戦→オッズ断層が各所で発生しやすい構造</p>
+</div>
+
+<hr>
+
+<h2>⑦ 日本馬の過去成績（参考）</h2>
+<table>
+  <thead><tr><th>年</th><th>馬名</th><th>着順</th><th>騎手</th></tr></thead>
+  <tbody>
+    <tr><td>2024</td><td class="pos">フォーエバーヤング</td><td class="pos"><strong>3</strong></td><td>坂井瑠星</td></tr>
+    <tr><td>2024</td><td>テーオーパスワード</td><td>5</td><td>木村和士</td></tr>
+    <tr><td>2023</td><td>デルマソトガケ</td><td>6</td><td>C.ルメール</td></tr>
+    <tr><td>2022</td><td>クラウンプライド</td><td>13</td><td>C.ルメール</td></tr>
+    <tr><td>2019</td><td>マスターフェンサー</td><td>6</td><td>J.ルパルー</td></tr>
+    <tr><td>2016</td><td>ラニ</td><td>9</td><td>武豊</td></tr>
+  </tbody>
+</table>
+<p>日本馬の最高成績は2024年フォーエバーヤング（坂井騎手）の3着。今年のワンダーディーンは同コンビ継続でこれに次ぐ成績への期待がかかる。</p>
+
+<hr>
+
+<div class="conclusion">
+<h2>📊 総合評価まとめ</h2>
+
+<p><strong>軸候補（アメリカ馬）</strong>：コマンドメント・ファーザーアドゥ・ザプーマが能力上位も、それぞれゲート不振枠・騎手乗り替わり等のマイナスを抱える。フロリダD経由3頭（コマンドメント・ザプーマ・チーフワラビー）は統計的に最も優位な臨戦パターン。</p>
+
+<p><strong>日本馬評価</strong>：ワンダーディーン＞＞ダノンバーボン。ワンダーディーンは人気薄・坂井騎手・先行力・UAEダービー経由と穴馬の条件が揃う。ダノンバーボンは血統適性はあるが経験不足でリスク高い。</p>
+
+<p><strong>荒れ度判定</strong>：有力馬2頭離脱・当日1番人気7連敗中・主要人気馬がいずれも不振枠に入るという3点から<strong class="pos">高め</strong>。伏兵台頭のシナリオは排除できない。</p>
+
+<p><strong>券種方針</strong>（参考）：混戦・荒れ度高のため3連複広め。軸をコマンドメントorザプーマに置き、ワンダーディーンを紐に入れる構成が一案。ファーザーアドゥ（17番枠）は統計的に消し評価だが能力は本物のため抑え程度。</p>
+
+</div>
+
+</body>
+</html>
