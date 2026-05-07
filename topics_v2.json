@@ -1,0 +1,87 @@
+{
+  "nav": {
+    "links": [
+      { "label": "予想スタイル", "url": "#approach" },
+      { "label": "取り組み",     "url": "#activities" },
+      { "label": "注目馬",       "url": "#horses" },
+      { "label": "記事",         "url": "#posts" },
+      { "label": "ラボ",         "url": "#lab" }
+    ],
+    "cta": { "label": "Follow on X", "url": "https://x.com/kracelab" }
+  },
+
+  "hero": {
+    "cta_label": "分析手法を見る",
+    "cta_url": "#approach"
+  },
+
+  "activities": [
+    { "icon": "📝", "title": "Note：テーマ記事",      "url": "https://note.com/regal_wasp9632",
+      "desc": "地方重賞、中央重賞、海外レース、レース結果分析など、ピックアップしたテーマを深掘りして取りまとめ、案内します。" },
+    { "icon": "𝕏",  "title": "X：各種メディア更新",  "url": "https://x.com/kracelab",
+      "desc": "最新の分析記事、データ更新、レース展望などをリアルタイムで発信。競馬界の動きを素早くキャッチ。" },
+    { "icon": "🌾", "title": "トラックバイアス分析",  "url": "",
+      "desc": "含水率、クッション値、砂圧等を計算ロジックで分析し、当日バイアスをAI予想。馬場の真実を数値化。" },
+    { "icon": "📊", "title": "過去走分析",             "url": "",
+      "desc": "近5走や過去走などを分析データとして、上がり、位置取り等をAI分析。走破パターンから勝機を見出す。" },
+    { "icon": "🧬", "title": "血統分析",               "url": "",
+      "desc": "母母父まで含めて分析することで、スピード・パワー・スタミナの視点、勝負強さ、前向き性などを評価。" },
+    { "icon": "🎯", "title": "総合分析（独自指数）",   "url": "",
+      "desc": "TargetEXPデータから各馬の地力、バイアス・展開、位置取りでのパラメータ増減をAI予測し、独自指数を算出。" }
+  ],
+
+  "posts": [
+    {
+      "category": "Track Bias",
+      "date": "2026-05-10",
+      "title": "5/10 東京・京都 バイアスレポート",
+      "excerpt": "",
+      "url": "bias-report.html"
+    },
+    {
+      "category": "Race Review",
+      "date": "2026-05-11",
+      "title": "NHKマイルC 2026 レース回顧",
+      "excerpt": "",
+      "url": "race-review.html"
+    },
+    {
+      "category": "OS Rules",
+      "date": "2026-05-07",
+      "title": "逃げ単独本命3条件則 — 京王杯SCで実証",
+      "excerpt": "",
+      "url": "os-rules.html"
+    }
+  ],
+
+  "footer": {
+    "col1": {
+      "title": "記事",
+      "links": [
+        { "label": "最新記事",   "url": "#posts" },
+        { "label": "ターフ分析", "url": "#posts" },
+        { "label": "ダート分析", "url": "#posts" },
+        { "label": "重賞展望",   "url": "#posts" },
+        { "label": "血統論",     "url": "#posts" }
+      ]
+    },
+    "col2": {
+      "title": "ラボ",
+      "links": [
+        { "label": "OSラップ理論", "url": "#lab" },
+        { "label": "バイアス分析", "url": "#lab" },
+        { "label": "コース図解",   "url": "#lab" },
+        { "label": "データ置き場", "url": "#lab" }
+      ]
+    },
+    "col3": {
+      "title": "サイト",
+      "links": [
+        { "label": "このサイトについて", "url": "about.html" },
+        { "label": "プロフィール",       "url": "about.html#profile" },
+        { "label": "お問い合わせ",       "url": "about.html#contact" },
+        { "label": "プライバシー",       "url": "about.html#privacy" }
+      ]
+    }
+  }
+}
