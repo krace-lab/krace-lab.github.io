@@ -1,0 +1,26 @@
+{
+  "bias": {
+    "title": "5/10 東京・京都 バイアスレポート",
+    "date": "2026-05-10",
+    "category": "Track Bias",
+    "url": "bias-report.html"
+  },
+  "review": {
+    "title": "NHKマイルC 2026 レース回顧",
+    "date": "2026-05-11",
+    "category": "Race Review",
+    "url": "race-review.html"
+  },
+  "os_rules": {
+    "title": "逃げ単独本命3条件則 — 京王杯SCで実証",
+    "date": "2026-05-07",
+    "category": "OS Rules",
+    "url": "os-rules.html"
+  },
+  "lab": {
+    "title": "ブリンカー2走目×前走補正90以上の道悪割引",
+    "date": "2026-05-05",
+    "category": "Research Lab",
+    "url": "lab.html"
+  }
+}
