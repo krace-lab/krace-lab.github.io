@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Latest Posts — TURF SIGNAL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Noto+Serif+JP:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --turf:       #1c4d30;
+    --turf-mid:   #2a6640;
+    --turf-light: #3d8455;
+    --dirt:       #8c6240;
+    --dirt-light: #c49060;
+    --black:      #080808;
+    --black-card: #111209;
+    --black-row:  #0d0f0b;
+    --cream:      #ede8dc;
+    --muted:      #7a7870;
+    --border:     rgba(61,132,85,0.15);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', 'Noto Serif JP', sans-serif;
+    background: var(--black);
+    color: var(--cream);
+    min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 5vw;
+    background: rgba(8,8,8,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 2px solid var(--turf);
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: .1em;
+    color: var(--turf-light);
+    text-decoration: none;
+  }
+  .nav-logo span { color: var(--dirt-light); }
+
+  .nav-back {
+    font-size: .72rem;
+    letter-spacing: .1em;
+    color: var(--turf-light);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .nav-back:hover { color: var(--cream); }
+
+  /* ── HEADER ── */
+  .page-header {
+    padding: 3rem 5vw 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    max-width: 860px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .page-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    letter-spacing: .06em;
+    color: var(--cream);
+    line-height: 1;
+  }
+
+  .page-updated {
+    font-size: .7rem;
+    letter-spacing: .1em;
+    color: var(--muted);
+    white-space: nowrap;
+    padding-bottom: .2rem;
+  }
+
+  /* ── POST LIST ── */
+  .post-list {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 5vw 5rem;
+  }
+
+  /* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     投稿を追加・編集する場合は .post-item を
+     コピー＆ペーストして中身を書き換えてください
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+  .post-item {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: inherit;
+    transition: background .15s;
+  }
+  .post-item:hover { background: var(--black-row); }
+  .post-item:first-child { border-top: 1px solid var(--border); }
+
+  .post-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    color: rgba(61,132,85,.25);
+    min-width: 2rem;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .post-info { flex: 1; }
+
+  .post-cat {
+    font-size: .65rem;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--turf-light);
+    margin-bottom: 3px;
+  }
+  .post-cat.dirt { color: var(--dirt-light); }
+
+  .post-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: .95rem;
+    font-weight: 600;
+    color: var(--cream);
+    line-height: 1.5;
+  }
+
+  .post-date {
+    font-size: .68rem;
+    color: var(--muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── NOTE LINK SECTION ── */
+  .note-section {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 5vw 5rem;
+  }
+
+  .note-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.2rem 1.4rem;
+    background: var(--black-card);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    transition: border-color .2s, background .2s;
+  }
+  .note-link:hover {
+    border-color: rgba(61,132,85,.4);
+    background: var(--black-row);
+  }
+
+  .note-link-left { display: flex; align-items: center; gap: 1rem; }
+
+  .note-icon {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--turf);
+    color: var(--cream);
+    flex-shrink: 0;
+  }
+
+  .note-label {
+    font-size: .68rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--turf-light);
+    margin-bottom: 2px;
+  }
+
+  .note-text {
+    font-size: .9rem;
+    font-weight: 500;
+    color: var(--cream);
+  }
+
+  .note-arrow {
+    font-size: .9rem;
+    color: var(--turf-light);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 5vw;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .footer-copy {
+    font-size: .72rem;
+    color: var(--muted);
+  }
+
+  .footer-back {
+    font-size: .72rem;
+    letter-spacing: .08em;
+    color: var(--turf-light);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  .footer-back:hover { color: var(--cream); }
+
+  @media (max-width: 600px) {
+    .page-header { flex-direction: column; align-items: flex-start; gap: .5rem; }
+    .post-num { display: none; }
+    .post-date { font-size: .62rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="index.html"><span>TURF</span> SIGNAL</a>
+  <a class="nav-back" href="index.html">← index.html へ戻る</a>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <h1 class="page-title">Latest Posts</h1>
+  <!-- ▼ 更新日をここだけ直す -->
+  <p class="page-updated">最終更新：2026-05-07</p>
+</div>
+
+<!-- ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  投稿リスト
+  追加：.post-item ブロックをコピーして末尾に追加
+  削除：該当 .post-item ブロックを丸ごと削除
+  編集：post-cat / post-title / post-date / href を書き換える
+  カテゴリ色：芝系 → post-cat（緑）  ダート系 → post-cat dirt（茶）
+  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ -->
+<div class="post-list">
+
+ <a class="post-item" href="https://note.com/regal_wasp9632/n/nbe871779eb7c" target="_blank" rel="noopener">
+    <span class="post-num">08</span>
+    <div class="post-info">
+      <p class="post-cat">Track Bias</p>
+      <p class="post-title">2026/05/03当日トラックバイアスまとめ｜東京・京都・新潟</p>
+    </div>
+    <span class="post-date">2026-05-03</span>
+  </a>
+
+ <a class="post-item" href="https://note.com/regal_wasp9632/n/ncbade57615a8" target="_blank" rel="noopener">
+    <span class="post-num">07</span>
+    <div class="post-info">
+      <p class="post-cat">Track Bias</p>
+      <p class="post-title">2026/05/03（前日想定）トラックバイアスまとめ｜東京・京都・新潟</p>
+    </div>
+    <span class="post-date">2026-05-02</span>
+  </a>
+
+ <a class="post-item" href="https://note.com/regal_wasp9632/n/n3a10c3833f63" target="_blank" rel="noopener">
+    <span class="post-num">06</span>
+    <div class="post-info">
+      <p class="post-cat">Track Bias</p>
+      <p class="post-title">2026/05/02当日トラックバイアスまとめ｜東京・京都・新潟</p>
+    </div>
+    <span class="post-date">2026-05-02</span>
+  </a>
+
+ <a class="post-item" href="https://note.com/regal_wasp9632/n/n0f0577cedb61" target="_blank" rel="noopener">
+    <span class="post-num">05</span>
+    <div class="post-info">
+      <p class="post-cat">Track Bias</p>
+      <p class="post-title">2026/05/02（前日想定）トラックバイアスまとめ｜東京・京都・新潟</p>
+    </div>
+    <span class="post-date">2026-05-01</span>
+  </a>
+
+   <a class="post-item" href="https://note.com/regal_wasp9632/n/n47fd744fb29e" target="_blank" rel="noopener">
+    <span class="post-num">04</span>
+    <div class="post-info">
+      <p class="post-cat dirt">重賞レース構造</p>
+      <p class="post-title">20260502中央競馬重賞レース構造：東京・京都</p>
+    </div>
+    <span class="post-date">2026-05-01</span>
+  </a>
+
+  <a class="post-item" href="https://note.com/regal_wasp9632/n/n1fc3b083cdde" target="_blank" rel="noopener">
+    <span class="post-num">03</span>
+    <div class="post-info">
+      <p class="post-cat">重賞分析</p>
+      <p class="post-title">20260503天皇賞春：血統分析、地力序列</p>
+    </div>
+    <span class="post-date">2026-05-03</span>
+  </a>
+
+  <a class="post-item" href="https://note.com/regal_wasp9632/n/nc7958143d77b" target="_blank" rel="noopener">
+    <span class="post-num">02</span>
+    <div class="post-info">
+      <p class="post-cat">重賞分析</p>
+      <p class="post-title">2026天皇賞春枠順、鞍上確定前の軸・紐候補</p>
+    </div>
+    <span class="post-date">2026-04-30</span>
+  </a>
+
+  <a class="post-item" href="https://krace-lab.github.io/2026_KentuckyDerby.html" target="_blank" rel="noopener">
+    <span class="post-num">01</span>
+    <div class="post-info">
+      <p class="post-cat dirt">海外競馬分析</p>
+      <p class="post-title">🌹 2026 ケンタッキーダービー 分析レポート</p>
+    </div>
+    <span class="post-date">2026-05-01</span>
+  </a>
+
+  <!-- ▼ 新しい投稿はここに追加（上のブロックをコピー） -->
+
+</div>
+
+<!-- NOTE LINK -->
+<!-- ▼ Noteのリンク先URLをここだけ変更 -->
+<div class="note-section">
+  <a class="note-link" href="https://note.com/regal_wasp9632" rel="noopener">
+    <div class="note-link-left">
+      <div class="note-icon">N</div>
+      <div>
+        <p class="note-label">Note</p>
+        <p class="note-text">最新記事は随時Noteで公開中</p>
+      </div>
+    </div>
+    <span class="note-arrow">→</span>
+  </a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <p class="footer-copy">© 2026 TURF SIGNAL</p>
+  <a class="footer-back" href="index.html">← トップへ戻る</a>
+</footer>
+
+</body>
+</html>
