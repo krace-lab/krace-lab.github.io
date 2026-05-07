@@ -115,8 +115,8 @@
     position: relative;
     min-height: 100vh;
     display: flex;
-    align-items: flex-end;
-    padding: 0 5vw 8vh;
+    align-items: flex-start;
+    padding: 18vh 5vw 8vh;
     overflow: hidden;
   }
 
@@ -135,7 +135,9 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 65% 40%, transparent 30%, rgba(8,8,8,0.85) 100%);
+    background:
+      linear-gradient(to right, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.15) 60%, transparent 100%),
+      radial-gradient(circle at 65% 40%, transparent 30%, rgba(8,8,8,0.6) 100%);
   }
 
   .hero-content {
@@ -146,35 +148,44 @@
   }
 
   .hero-label {
-    font-size: 0.7rem;
-    letter-spacing: 0.18em;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
     color: var(--turf-light);
-    margin-bottom: 1.2rem;
+    margin-bottom: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: .9rem;
+  }
+  .hero-label::before {
+    content: '';
     display: inline-block;
-    padding: 0.4rem 1.1rem;
-    background: var(--turf-glow);
-    border: 1px solid rgba(61,132,85,0.28);
+    width: 2.5rem;
+    height: 1px;
+    background: var(--turf-light);
   }
 
   .hero-h1 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(3.5rem, 10vw, 7rem);
-    font-weight: 900;
-    letter-spacing: 0.02em;
-    line-height: 0.98;
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(2.4rem, 6vw, 4.8rem);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1.08;
     margin-bottom: 1.6rem;
+    max-width: 44vw;
+    text-shadow: 0 2px 12px rgba(0,0,0,0.7), 0 4px 32px rgba(0,0,0,0.5);
   }
 
   .hero-h1 span { color: var(--dirt-light); }
 
   .hero-p {
     font-family: 'Noto Serif JP', serif;
-    font-size: clamp(1.1rem, 2vw, 1.4rem);
-    line-height: 1.75;
-    color: rgba(237,232,220,0.82);
+    font-size: clamp(0.9rem, 1.3vw, 1.05rem);
+    line-height: 1.85;
+    color: rgba(237,232,220,0.92);
     margin-bottom: 2.6rem;
-    max-width: 700px;
+    max-width: 38vw;
+    text-shadow: 0 1px 8px rgba(0,0,0,0.8);
   }
 
   .hero-cta {
@@ -882,9 +893,9 @@
 <section class="hero">
   <div class="hero-bg"></div>
   <div class="hero-content">
-    <span class="hero-label">Independent Racing Analysis</span>
-    <h1 class="hero-h1"><span>TURF</span> SIGNAL</h1>
-    <p class="hero-p">芝とダートの向こう側へ。<br>データと直感で競馬の構造を読み解く独立競馬分析メディア。</p>
+    <span class="hero-label">Japan's Horse Racing Media</span>
+    <h1 class="hero-h1">芝と<span>ダート</span>の<br>向こう側へ。</h1>
+    <p class="hero-p">データと直感が交差する競馬分析メディア。バイアス解析、OSラップ、推し馬レビューで、あなたの観戦を深く、鋭く。</p>
     <a class="hero-cta" href="#approach">分析手法を見る</a>
   </div>
 </section>
