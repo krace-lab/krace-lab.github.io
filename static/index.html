@@ -37,8 +37,9 @@ let stream = null;
 let captureInterval = null;
 let canvas, ctx, video;
 let prevFrameGray = null;
-const CAPTURE_FPS = 15;
-const MOTION_THRESHOLD = 0.015;
+const CAPTURE_FPS = 2;
+const MOTION_LOW = 0.0005;
+const MOTION_HIGH = 0.15;
 
 function log(msg) {
   const el = document.getElementById('log');
@@ -76,7 +77,7 @@ async function captureAndSend() {
 
   if (prevFrameGray) {
     const diff = grayDiff(gray, prevFrameGray);
-    if (diff < 0.003 || diff > MOTION_THRESHOLD) {
+    if (diff < MOTION_LOW || diff > MOTION_HIGH) {
       prevFrameGray = gray;
       return;
     }
@@ -125,6 +126,7 @@ document.getElementById('btn-start').addEventListener('click', async () => {
   ctx = canvas.getContext('2d');
 
   captureInterval = setInterval(captureAndSend, Math.floor(1000 / CAPTURE_FPS));
+  log(`キャプチャ開始: ${CAPTURE_FPS}fps`);
 
   document.getElementById('btn-start').disabled = true;
   document.getElementById('btn-finish').disabled = false;
