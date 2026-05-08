@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>パドック診断</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Helvetica Neue', sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 30px; }
+h1 { font-size: 1.6em; margin-bottom: 20px; color: #a8d8ea; }
+.card { background: #16213e; border-radius: 12px; padding: 24px; width: 100%; max-width: 600px; margin-bottom: 20px; }
+label { display: block; margin-bottom: 6px; color: #aaa; font-size: 0.9em; }
+input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #333; background: #0f3460; color: #eee; font-size: 1em; margin-bottom: 16px; }
+button { width: 100%; padding: 14px; border: none; border-radius: 8px; font-size: 1.1em; cursor: pointer; font-weight: bold; transition: opacity .2s; }
+button:disabled { opacity: .4; cursor: not-allowed; }
+#btn-start { background: #e94560; color: white; }
+#btn-finish { background: #0f3460; color: #a8d8ea; border: 2px solid #a8d8ea; margin-top: 12px; }
+#status { padding: 12px; border-radius: 8px; background: #0f3460; font-size: 0.9em; min-height: 48px; margin-top: 16px; white-space: pre-wrap; }
+#log { font-size: 0.8em; color: #888; max-height: 200px; overflow-y: auto; margin-top: 12px; }
+</style>
+</head>
+<body>
+<h1>🐎 パドック診断システム</h1>
+<div class="card">
+  <label>開催場</label>
+  <input id="venue" value="東京" />
+  <label>レース番号</label>
+  <input id="race" value="11" />
+  <button id="btn-start">▶ 分析開始</button>
+  <button id="btn-finish" disabled>■ 診断完了 → HTMLダウンロード</button>
+  <div id="status">待機中...</div>
+  <div id="log"></div>
+</div>
+
+<script>
+let sessionId = null;
+let stream = null;
+let captureInterval = null;
+let canvas, ctx, video;
+let prevFrameGray = null;
+const CAPTURE_FPS = 15;
+const MOTION_THRESHOLD = 0.015;
+
+function log(msg) {
+  const el = document.getElementById('log');
+  el.textContent = new Date().toLocaleTimeString() + ' ' + msg + '\n' + el.textContent;
+}
+
+function status(msg) {
+  document.getElementById('status').textContent = msg;
+}
+
+function grayDiff(curr, prev) {
+  let sum = 0;
+  for (let i = 0; i < curr.length; i++) sum += Math.abs(curr[i] - prev[i]);
+  return sum / curr.length / 255;
+}
+
+function getGrayPixels(imageData) {
+  const d = imageData.data;
+  const gray = new Float32Array(imageData.width * imageData.height);
+  for (let i = 0; i < gray.length; i++) {
+    gray[i] = 0.299 * d[i*4] + 0.587 * d[i*4+1] + 0.114 * d[i*4+2];
+  }
+  return gray;
+}
+
+async function captureAndSend() {
+  if (!canvas || !ctx || !video) return;
+  ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+  const small = document.createElement('canvas');
+  small.width = 160; small.height = 90;
+  small.getContext('2d').drawImage(canvas, 0, 0, 160, 90);
+  const imgData = small.getContext('2d').getImageData(0, 0, 160, 90);
+  const gray = getGrayPixels(imgData);
+
+  if (prevFrameGray) {
+    const diff = grayDiff(gray, prevFrameGray);
+    if (diff < 0.003 || diff > MOTION_THRESHOLD) {
+      prevFrameGray = gray;
+      return;
+    }
+  }
+  prevFrameGray = gray;
+
+  canvas.toBlob(async (blob) => {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const b64 = reader.result.split(',')[1];
+      try {
+        const res = await fetch('/analyze/frame', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId, image_base64: b64, timestamp: Date.now() / 1000 })
+        });
+        const data = await res.json();
+        if (data.status === 'evaluated') {
+          log(`馬番${data.horse_number}: ${data.sabc} (前進気勢: ${data.zenshin_kise})`);
+          status(`分析中... 馬番${data.horse_number} → ${data.sabc}`);
+        }
+      } catch (e) { log('送信エラー: ' + e.message); }
+    };
+    reader.readAsDataURL(blob);
+  }, 'image/jpeg', 0.85);
+}
+
+document.getElementById('btn-start').addEventListener('click', async () => {
+  const venue = document.getElementById('venue').value;
+  const race = document.getElementById('race').value;
+
+  const sres = await fetch('/session/start', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ venue, race_number: race })
+  });
+  const sdata = await sres.json();
+  sessionId = sdata.session_id;
+
+  stream = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: CAPTURE_FPS }, audio: false });
+  video = document.createElement('video');
+  video.srcObject = stream;
+  await video.play();
+
+  canvas = document.createElement('canvas');
+  canvas.width = 1280; canvas.height = 720;
+  ctx = canvas.getContext('2d');
+
+  captureInterval = setInterval(captureAndSend, Math.floor(1000 / CAPTURE_FPS));
+
+  document.getElementById('btn-start').disabled = true;
+  document.getElementById('btn-finish').disabled = false;
+  status(`分析中 [セッション: ${sessionId}] - パドック終了後に「診断完了」を押してください`);
+  log(`セッション開始: ${venue} ${race}R (ID: ${sessionId})`);
+});
+
+document.getElementById('btn-finish').addEventListener('click', async () => {
+  clearInterval(captureInterval);
+  if (stream) stream.getTracks().forEach(t => t.stop());
+
+  status('診断データを集計中...');
+  const res = await fetch('/session/finish', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ session_id: sessionId })
+  });
+  const data = await res.json();
+
+  if (data.status === 'complete') {
+    const filename = data.report_path.split('/').pop().split('\\').pop();
+    const link = document.createElement('a');
+    link.href = `/report/${filename}`;
+    link.download = filename;
+    link.click();
+    status(`✅ 完了！HTMLをダウンロードしました: ${filename}`);
+    log('診断完了 → ' + filename);
+  }
+
+  document.getElementById('btn-start').disabled = false;
+  document.getElementById('btn-finish').disabled = true;
+});
+</script>
+</body>
+</html>
