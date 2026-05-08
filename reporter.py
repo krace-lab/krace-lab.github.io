@@ -28,7 +28,7 @@ tr:hover{background:#f9f9f9}
 </head>
 <body>
 <h1>パドック診断データ - {{ r.venue }}{{ r.race_number }}R</h1>
-<div class="meta">分析日: {{ r.date }} | フレーム数: {{ r.total_frames }}枚 | モデル: LLaVA 13B</div>
+<div class="meta">分析日: {{ r.date }} | フレーム数: {{ r.total_frames }}枚 | モデル: LLaVA 7B</div>
 <table>
 <tr><th>馬番</th><th>馬名</th><th>体重</th><th>騎手</th><th>SABC</th><th>前進気勢</th><th>発汗</th><th>歩様</th><th>引き手</th><th>コース適性</th><th>F数</th><th>特記</th></tr>
 {% for h in r.horses %}
