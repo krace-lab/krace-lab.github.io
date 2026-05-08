@@ -13,7 +13,7 @@ EVAL_PROMPT = """あなたは熟練の競馬相馬眼師です。馬体画像を
 
 {"sabc":"S/A/B/C","zenshin_kise":{"score":-15から15,"detail":""},"front_drive":{"neck_rhythm":"良/普通/悪","outside_walk":true/false,"catching_up":true/false},"condition":{"ear":"前向き/普通/後ろ","sweat":"なし/うっすら/危険","gait":"滑らか/普通/硬め","belly":"絞れ/普通/太め","handlers":1または2,"blinker":true/false},"body_type":{"tomo":"発達/普通/未発達","chest":"発達/普通/未発達"},"course_fit":[],"debuff_flag":true/false,"notes":""}"""
 
-def evaluate_frame(image_base64: str, model: str = "llava:13b") -> FrameEvaluation:
+def evaluate_frame(image_base64: str, model: str = "llava:7b") -> FrameEvaluation:
     response = ollama.chat(
         model=model,
         messages=[{"role": "user", "content": EVAL_PROMPT, "images": [image_base64]}]
