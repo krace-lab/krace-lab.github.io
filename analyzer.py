@@ -3,15 +3,20 @@ import json
 import re
 from models import FrameEvaluation, ZenshinKise, FrontDrive, Condition, BodyType
 
-EVAL_PROMPT = """あなたは熟練の競馬相馬眼師です。馬体画像を分析し、必ずJSON形式のみで回答してください。
+EVAL_PROMPT = """You are an expert Japanese horse racing analyst. Analyze this paddock image and respond with ONLY a JSON object, no other text.
 
-評価観点:
-- トモ発達=芝大回り向き(東京・阪神・中京・新潟) / 胸前発達=ダート小回り向き(中山・京都・小倉・函館・札幌・福島)
-- 前進気勢: 首の上下リズム・外側歩行・前馬追走
-- 耳の向き・歩様・お腹の絞り・発汗(うっすら白汗OK/垂れる=危険)・引き手人数・ブリンカー有無
-- 筋肉の張り・目の輝き・勝負気配
+Evaluation criteria:
+- hindquarters development = suited for large turf courses (Tokyo/Hanshin/Chukyo/Niigata)
+- chest/shoulder development = suited for dirt/small courses (Nakayama/Kyoto/Kokura/Hakodate/Sapporo/Fukushima)
+- forward energy: head bobbing rhythm, walking outside track, chasing front horse
+- ear position, gait, belly tightness, sweat (slight white OK / dripping = danger), handlers count, blinkers
+- muscle tension, eye brightness, fighting spirit
 
-{"sabc":"S/A/B/C","zenshin_kise":{"score":-15から15,"detail":""},"front_drive":{"neck_rhythm":"良/普通/悪","outside_walk":true/false,"catching_up":true/false},"condition":{"ear":"前向き/普通/後ろ","sweat":"なし/うっすら/危険","gait":"滑らか/普通/硬め","belly":"絞れ/普通/太め","handlers":1または2,"blinker":true/false},"body_type":{"tomo":"発達/普通/未発達","chest":"発達/普通/未発達"},"course_fit":[],"debuff_flag":true/false,"notes":""}"""
+Respond with exactly this JSON structure filled with your assessment:
+{"sabc":"A","zenshin_kise":{"score":5,"detail":"good rhythm"},"front_drive":{"neck_rhythm":"良","outside_walk":false,"catching_up":false},"condition":{"ear":"前向き","sweat":"なし","gait":"滑らか","belly":"絞れ","handlers":1,"blinker":false},"body_type":{"tomo":"発達","chest":"普通"},"course_fit":["東京","阪神"],"debuff_flag":false,"notes":""}
+
+sabc must be exactly one of: S, A, B, or C
+zenshin_kise score must be an integer from -15 to 15"""
 
 def evaluate_frame(image_base64: str, model: str = "llava:7b") -> FrameEvaluation:
     response = ollama.chat(
@@ -26,8 +31,10 @@ def parse_llava_response(text: str) -> FrameEvaluation:
         return _default_evaluation()
     try:
         d = json.loads(match.group())
+        sabc_raw = d.get("sabc", "C")
+        sabc = sabc_raw if sabc_raw in ("S", "A", "B", "C") else "C"
         return FrameEvaluation(
-            sabc=d.get("sabc", "C"),
+            sabc=sabc,
             zenshin_kise=ZenshinKise(**d.get("zenshin_kise", {"score": 0, "detail": ""})),
             front_drive=FrontDrive(**d.get("front_drive", {"neck_rhythm": "普通", "outside_walk": False, "catching_up": False})),
             condition=Condition(**d.get("condition", {"ear": "普通", "sweat": "なし", "gait": "普通", "belly": "普通", "handlers": 1, "blinker": False})),

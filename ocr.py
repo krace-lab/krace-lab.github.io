@@ -31,9 +31,10 @@ def parse_telop_text(text: str) -> TelopsData:
     if num:
         data.horse_number = int(num.group(1))
 
-    weight = re.search(r"([+-]?\d+)kg", text)
+    weight = re.search(r"([+-]?\d+)k[g9gq]", text)
     if weight:
-        data.weight_change = weight.group(0)
+        raw = weight.group(0)
+        data.weight_change = re.sub(r"k[g9gq]", "kg", raw)
 
     load = re.search(r"(\d{2}\.\d)", text)
     if load:

@@ -72,9 +72,13 @@ def analyze_frame(data: FrameData):
         t.jockey = telops.jockey
 
     elapsed = time.time() - horses[horse_num]["last_eval"]
-    if elapsed < 8.0:
+    if elapsed < 15.0:
         print(f"[FRAME #{n}] horse={horse_num} rate_limit (elapsed={elapsed:.1f}s)")
         return {"status": "skipped", "reason": "rate_limit"}
+
+    if session["pending"] >= 3:
+        print(f"[FRAME #{n}] horse={horse_num} skipped: queue_full (pending={session['pending']})")
+        return {"status": "skipped", "reason": "queue_full"}
 
     horses[horse_num]["last_eval"] = time.time()
     image_for_eval = preprocess_frame(crop_horse_area(data.image_base64))
@@ -107,8 +111,8 @@ def finish_session(req: SessionFinishRequest):
 
     print(f"[FINISH] session={req.session_id} total_frames={session['total_frames']} horses={list(session['horses'].keys())} pending={session['pending']}")
 
-    # 実行中のLLaVA評価が終わるまで最大30秒待つ
-    deadline = time.time() + 30
+    # 実行中のLLaVA評価が終わるまで最大90秒待つ
+    deadline = time.time() + 90
     while session["pending"] > 0 and time.time() < deadline:
         time.sleep(0.5)
     print(f"[FINISH] wait done, pending={session['pending']}")
