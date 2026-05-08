@@ -36,10 +36,7 @@ let sessionId = null;
 let stream = null;
 let captureInterval = null;
 let canvas, ctx, video;
-let prevFrameGray = null;
 const CAPTURE_FPS = 2;
-const MOTION_LOW = 0.0005;
-const MOTION_HIGH = 0.15;
 
 function log(msg) {
   const el = document.getElementById('log');
@@ -50,39 +47,9 @@ function status(msg) {
   document.getElementById('status').textContent = msg;
 }
 
-function grayDiff(curr, prev) {
-  let sum = 0;
-  for (let i = 0; i < curr.length; i++) sum += Math.abs(curr[i] - prev[i]);
-  return sum / curr.length / 255;
-}
-
-function getGrayPixels(imageData) {
-  const d = imageData.data;
-  const gray = new Float32Array(imageData.width * imageData.height);
-  for (let i = 0; i < gray.length; i++) {
-    gray[i] = 0.299 * d[i*4] + 0.587 * d[i*4+1] + 0.114 * d[i*4+2];
-  }
-  return gray;
-}
-
 async function captureAndSend() {
   if (!canvas || !ctx || !video) return;
   ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-  const small = document.createElement('canvas');
-  small.width = 160; small.height = 90;
-  small.getContext('2d').drawImage(canvas, 0, 0, 160, 90);
-  const imgData = small.getContext('2d').getImageData(0, 0, 160, 90);
-  const gray = getGrayPixels(imgData);
-
-  if (prevFrameGray) {
-    const diff = grayDiff(gray, prevFrameGray);
-    if (diff < MOTION_LOW || diff > MOTION_HIGH) {
-      prevFrameGray = gray;
-      return;
-    }
-  }
-  prevFrameGray = gray;
 
   canvas.toBlob(async (blob) => {
     const reader = new FileReader();
