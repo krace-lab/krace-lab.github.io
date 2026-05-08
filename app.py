@@ -34,6 +34,7 @@ def start_session(req: SessionStartRequest):
         "horses": {}, "total_frames": 0,
         "pending": 0, "pending_lock": threading.Lock()
     }
+    print(f"[START] session={sid} venue={req.venue} race={req.race_number}")
     return {"session_id": sid}
 
 @app.post("/analyze/frame")
@@ -43,12 +44,18 @@ def analyze_frame(data: FrameData):
         return JSONResponse(status_code=404, content={"error": "session not found"})
 
     session["total_frames"] += 1
+    n = session["total_frames"]
 
-    if not is_stable_frame(data.image_base64):
+    stable = is_stable_frame(data.image_base64)
+    if not stable:
+        if n % 10 == 0:
+            print(f"[FRAME #{n}] skipped: motion")
         return {"status": "skipped", "reason": "motion"}
 
     telops = extract_telops(data.image_base64)
     horse_num = telops.horse_number
+    print(f"[FRAME #{n}] stable=True  OCR→ horse_num={horse_num} name={telops.horse_name} weight={telops.weight_change}")
+
     if not horse_num:
         return {"status": "skipped", "reason": "no_horse_number"}
 
@@ -64,7 +71,9 @@ def analyze_frame(data: FrameData):
     if telops.jockey:
         t.jockey = telops.jockey
 
-    if time.time() - horses[horse_num]["last_eval"] < 8.0:
+    elapsed = time.time() - horses[horse_num]["last_eval"]
+    if elapsed < 8.0:
+        print(f"[FRAME #{n}] horse={horse_num} rate_limit (elapsed={elapsed:.1f}s)")
         return {"status": "skipped", "reason": "rate_limit"}
 
     horses[horse_num]["last_eval"] = time.time()
@@ -73,18 +82,21 @@ def analyze_frame(data: FrameData):
     with session["pending_lock"]:
         session["pending"] += 1
 
-    def run_eval(img, horse_entry, sess):
+    def run_eval(img, horse_entry, sess, h_num):
+        print(f"[LLAVA] start eval horse={h_num}")
         evaluation = evaluate_frame(img)
         horse_entry["evals"].append(evaluation)
         with sess["pending_lock"]:
             sess["pending"] -= 1
+        print(f"[LLAVA] done  horse={h_num} sabc={evaluation.sabc} pending={sess['pending']}")
 
     threading.Thread(
         target=run_eval,
-        args=(image_for_eval, horses[horse_num], session),
+        args=(image_for_eval, horses[horse_num], session, horse_num),
         daemon=True
     ).start()
 
+    print(f"[FRAME #{n}] queued LLaVA for horse={horse_num} pending={session['pending']}")
     return {"status": "queued", "horse_number": horse_num}
 
 @app.post("/session/finish")
@@ -93,10 +105,13 @@ def finish_session(req: SessionFinishRequest):
     if not session:
         return JSONResponse(status_code=404, content={"error": "session not found"})
 
+    print(f"[FINISH] session={req.session_id} total_frames={session['total_frames']} horses={list(session['horses'].keys())} pending={session['pending']}")
+
     # 実行中のLLaVA評価が終わるまで最大30秒待つ
     deadline = time.time() + 30
     while session["pending"] > 0 and time.time() < deadline:
         time.sleep(0.5)
+    print(f"[FINISH] wait done, pending={session['pending']}")
 
     horses = [
         aggregate_horse_frames(num, d["telops"], d["evals"])
