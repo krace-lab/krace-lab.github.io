@@ -64,7 +64,7 @@ def analyze_frame(data: FrameData):
     if telops.jockey:
         t.jockey = telops.jockey
 
-    if time.time() - horses[horse_num]["last_eval"] < 4.0:
+    if time.time() - horses[horse_num]["last_eval"] < 8.0:
         return {"status": "skipped", "reason": "rate_limit"}
 
     horses[horse_num]["last_eval"] = time.time()

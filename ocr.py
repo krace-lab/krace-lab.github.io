@@ -18,7 +18,7 @@ def extract_telops(image_base64: str) -> TelopsData:
 
     image = Image.open(io.BytesIO(base64.b64decode(image_base64)))
     w, h = image.size
-    telop = image.crop((0, int(h * 0.85), w, h))
+    telop = image.crop((0, int(h * 0.75), w, h))
     results = _get_reader().readtext(np.array(telop))
     text = " ".join(r[1] for r in results)
     return parse_telop_text(text)

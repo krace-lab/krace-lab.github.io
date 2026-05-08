@@ -16,7 +16,7 @@ def preprocess_frame(image_base64: str) -> str:
     image = image.resize((640, new_h)).convert("L")
     return _encode(image)
 
-def is_stable_frame(image_base64: str, low: float = 0.003, high: float = 0.04) -> bool:
+def is_stable_frame(image_base64: str, low: float = 0.001, high: float = 0.12) -> bool:
     global _prev_frame
     image = _decode(image_base64).convert("L").resize((320, 180))
     frame = np.array(image, dtype=np.float32) / 255.0
