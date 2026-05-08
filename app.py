@@ -31,7 +31,8 @@ def start_session(req: SessionStartRequest):
     sid = str(uuid.uuid4())[:8]
     sessions[sid] = {
         "venue": req.venue, "race_number": req.race_number,
-        "horses": {}, "total_frames": 0
+        "horses": {}, "total_frames": 0,
+        "pending": 0, "pending_lock": threading.Lock()
     }
     return {"session_id": sid}
 
@@ -69,13 +70,18 @@ def analyze_frame(data: FrameData):
     horses[horse_num]["last_eval"] = time.time()
     image_for_eval = preprocess_frame(crop_horse_area(data.image_base64))
 
-    def run_eval(img, horse_entry):
+    with session["pending_lock"]:
+        session["pending"] += 1
+
+    def run_eval(img, horse_entry, sess):
         evaluation = evaluate_frame(img)
         horse_entry["evals"].append(evaluation)
+        with sess["pending_lock"]:
+            sess["pending"] -= 1
 
     threading.Thread(
         target=run_eval,
-        args=(image_for_eval, horses[horse_num]),
+        args=(image_for_eval, horses[horse_num], session),
         daemon=True
     ).start()
 
@@ -86,6 +92,11 @@ def finish_session(req: SessionFinishRequest):
     session = sessions.get(req.session_id)
     if not session:
         return JSONResponse(status_code=404, content={"error": "session not found"})
+
+    # 実行中のLLaVA評価が終わるまで最大30秒待つ
+    deadline = time.time() + 30
+    while session["pending"] > 0 and time.time() < deadline:
+        time.sleep(0.5)
 
     horses = [
         aggregate_horse_frames(num, d["telops"], d["evals"])
