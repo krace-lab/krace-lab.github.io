@@ -1,3 +1,4 @@
+import threading
 import time
 import uuid
 from datetime import datetime
@@ -65,12 +66,20 @@ def analyze_frame(data: FrameData):
     if time.time() - horses[horse_num]["last_eval"] < 4.0:
         return {"status": "skipped", "reason": "rate_limit"}
 
-    evaluation = evaluate_frame(preprocess_frame(crop_horse_area(data.image_base64)))
-    horses[horse_num]["evals"].append(evaluation)
     horses[horse_num]["last_eval"] = time.time()
+    image_for_eval = preprocess_frame(crop_horse_area(data.image_base64))
 
-    return {"status": "evaluated", "horse_number": horse_num,
-            "sabc": evaluation.sabc, "zenshin_kise": evaluation.zenshin_kise.score}
+    def run_eval(img, horse_entry):
+        evaluation = evaluate_frame(img)
+        horse_entry["evals"].append(evaluation)
+
+    threading.Thread(
+        target=run_eval,
+        args=(image_for_eval, horses[horse_num]),
+        daemon=True
+    ).start()
+
+    return {"status": "queued", "horse_number": horse_num}
 
 @app.post("/session/finish")
 def finish_session(req: SessionFinishRequest):
