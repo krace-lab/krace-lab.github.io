@@ -1,0 +1,250 @@
+
+<h2 class="sr-only">平安S 過去27年データ分析レポート</h2>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4J7XM5HT7V"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-4J7XM5HT7V');
+</script>
+
+<style>
+.section { margin: 0 0 2rem; }
+.section-label { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-tertiary); margin: 0 0 0.75rem; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; }
+.grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.metric { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 0.85rem 1rem; }
+.metric-label { font-size: 12px; color: var(--color-text-secondary); margin: 0 0 4px; }
+.metric-value { font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin: 0; }
+.metric-sub { font-size: 11px; color: var(--color-text-tertiary); margin: 4px 0 0; }
+.card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; }
+.badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: var(--border-radius-md); }
+.badge-warn { background: #FAEEDA; color: #854F0B; }
+.badge-info { background: #E6F1FB; color: #185FA5; }
+.badge-danger { background: #FCEBEB; color: #A32D2D; }
+.badge-success { background: #EAF3DE; color: #3B6D11; }
+.badge-gray { background: #F1EFE8; color: #5F5E5A; }
+.divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 1.5rem 0; }
+.row-item { display: flex; align-items: center; justify-content: space-between; padding: 7px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
+.row-item:last-child { border-bottom: none; }
+.row-key { color: var(--color-text-secondary); }
+.row-val { font-weight: 500; color: var(--color-text-primary); }
+.pattern-card { border-left: 3px solid; padding: 0.85rem 1rem; border-radius: 0 var(--border-radius-md) var(--border-radius-md) 0; margin-bottom: 0.75rem; background: var(--color-background-secondary); }
+.pattern-title { font-size: 13px; font-weight: 500; margin: 0 0 4px; }
+.pattern-body { font-size: 12px; color: var(--color-text-secondary); margin: 0; line-height: 1.6; }
+.memo-block { border-left: 3px solid var(--color-border-tertiary); padding: 0.5rem 1rem; margin-bottom: 0.5rem; }
+.memo-label { font-size: 11px; color: var(--color-text-tertiary); margin: 0 0 2px; }
+.memo-text { font-size: 13px; color: var(--color-text-primary); margin: 0; }
+.attention { background: #FAEEDA; border-radius: var(--border-radius-md); padding: 0.75rem 1rem; font-size: 13px; color: #633806; }
+</style>
+
+<div style="padding: 1rem 0">
+
+<div class="section">
+  <p class="section-label">平安S（G3） 過去27年構造分析</p>
+  <div class="grid-4">
+    <div class="metric">
+      <p class="metric-label">逃げ馬勝率</p>
+      <p class="metric-value">40.7%</p>
+      <p class="metric-sub">全脚質最高</p>
+    </div>
+    <div class="metric">
+      <p class="metric-label">1番人気複勝率</p>
+      <p class="metric-value">55.6%</p>
+      <p class="metric-sub">裏を返せば44%着外</p>
+    </div>
+    <div class="metric">
+      <p class="metric-label">6番人気以下1着</p>
+      <p class="metric-value">8回</p>
+      <p class="metric-sub">全体の約30%</p>
+    </div>
+    <div class="metric">
+      <p class="metric-label">5歳馬勝利数</p>
+      <p class="metric-value">12勝</p>
+      <p class="metric-sub">全年齢最多</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p class="section-label">脚質別成績（27年累計）</p>
+  <div style="position: relative; width: 100%; height: 200px;">
+    <canvas id="styleChart" role="img" aria-label="脚質別1着〜3着着度数。逃げが最多勝利。"></canvas>
+  </div>
+  <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 10px; font-size: 12px; color: var(--color-text-secondary);">
+    <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#C0DD97;"></span>3着</span>
+    <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#639922;"></span>2着</span>
+    <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#27500A;"></span>1着</span>
+  </div>
+</div>
+
+<div class="section">
+  <p class="section-label">枠順別複勝率</p>
+  <div style="position: relative; width: 100%; height: 180px;">
+    <canvas id="frameChart" role="img" aria-label="枠順別複勝率。1〜3枠が高く7〜8枠が低い。"></canvas>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <p class="section-label">人気別成績パターン</p>
+  <div class="grid-3">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:500;">1番人気</span>
+        <span class="badge badge-info">複勝 55.6%</span>
+      </div>
+      <div class="row-item"><span class="row-key">1着</span><span class="row-val">7回</span></div>
+      <div class="row-item"><span class="row-key">2着</span><span class="row-val">5回</span></div>
+      <div class="row-item"><span class="row-key">3着</span><span class="row-val">3回</span></div>
+      <div class="row-item"><span class="row-key">着外</span><span class="row-val" style="color:#A32D2D;">12回</span></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:500;">3番人気</span>
+        <span class="badge badge-warn">複勝 55.6%</span>
+      </div>
+      <div class="row-item"><span class="row-key">1着</span><span class="row-val">2回</span></div>
+      <div class="row-item"><span class="row-key">2着</span><span class="row-val">8回</span></div>
+      <div class="row-item"><span class="row-key">3着</span><span class="row-val">5回</span></div>
+      <div class="row-item"><span class="row-key">着外</span><span class="row-val">12回</span></div>
+    </div>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <span style="font-size:14px;font-weight:500;">4番人気</span>
+        <span class="badge badge-danger">2着ゼロ</span>
+      </div>
+      <div class="row-item"><span class="row-key">1着</span><span class="row-val">3回</span></div>
+      <div class="row-item"><span class="row-key">2着</span><span class="row-val" style="color:#A32D2D;">0回</span></div>
+      <div class="row-item"><span class="row-key">3着</span><span class="row-val">3回</span></div>
+      <div class="row-item"><span class="row-key">着外</span><span class="row-val">21回</span></div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <p class="section-label">展開パターン（ラップ型の分類）</p>
+  <div class="pattern-card" style="border-left-color: #27500A;">
+    <p class="pattern-title" style="color:#27500A;">パターンA ｜ 平均前半 → ロンスパ差し型</p>
+    <p class="pattern-body">前3F=36.5〜37.5。3〜4角からペースアップ。先行・中団前目が残りやすい。2025・2020年タイプ。今年の最頻出シナリオ。</p>
+  </div>
+  <div class="pattern-card" style="border-left-color: #BA7517;">
+    <p class="pattern-title" style="color:#BA7517;">パターンB ｜ 超スロー → 逃げ残り型</p>
+    <p class="pattern-body">前3F=37.5超。逃げ馬が単騎楽逃げ。馬場差がマイナス大（-10以下）の年に出現しやすい。2018・2016・2015年タイプ。</p>
+  </div>
+  <div class="pattern-card" style="border-left-color: #A32D2D;">
+    <p class="pattern-title" style="color:#A32D2D;">パターンC ｜ 前半ハイ → 消耗戦型</p>
+    <p class="pattern-body">前3F=35秒台前半。逃げ馬複数が競り合い消耗戦。中団差しが浮上。2017・2021年タイプ。頻度は低いが荒れ幅が最大。</p>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <p class="section-label">リピーター注意リスト</p>
+  <div class="attention">
+    <strong>⚠ 複数年好走馬が多数存在。出走確認後は必ず照合。</strong><br>
+    スマートボーイ（3年連続馬券内）、クリノスターオー（3年連続2着以内）、オースミジェット（連覇）、クーリンガー（2年連続2着）、メイショウフンジン（2023年5着→2024年3着）
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <p class="section-label">年齢・性別傾向</p>
+  <div class="grid-2">
+    <div class="card">
+      <p style="font-size:13px;font-weight:500;margin:0 0 10px;">年齢別1着数</p>
+      <div class="row-item"><span class="row-key">4歳</span><span class="row-val">6勝（2着9回）</span></div>
+      <div class="row-item"><span class="row-key">5歳</span><span class="row-val" style="color:#27500A;">12勝 ◎最多</span></div>
+      <div class="row-item"><span class="row-key">6歳</span><span class="row-val">5勝</span></div>
+      <div class="row-item"><span class="row-key">7歳以上</span><span class="row-val" style="color:#5F5E5A;">4勝（信頼低下）</span></div>
+    </div>
+    <div class="card">
+      <p style="font-size:13px;font-weight:500;margin:0 0 10px;">牡牝・枠傾向メモ</p>
+      <div class="row-item"><span class="row-key">牝馬好走条件</span><span class="row-val">軽量55kg前後</span></div>
+      <div class="row-item"><span class="row-key">有利枠</span><span class="row-val" style="color:#27500A;">1〜3枠（内枠先行）</span></div>
+      <div class="row-item"><span class="row-key">不利枠</span><span class="row-val" style="color:#A32D2D;">7・8枠（複勝率10〜13%）</span></div>
+      <div class="row-item"><span class="row-key">騎手注目</span><span class="row-val">松山弘平（近2年連続V）</span></div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider">
+
+<div class="section">
+  <p class="section-label">レースメモ（当日チェックリスト）</p>
+  <div class="memo-block">
+    <p class="memo-label">馬場確認</p>
+    <p class="memo-text">1〜3R結果で馬場差の方向を確認。マイナス大（-10以下）→ パターンB警戒・前強化。プラス方向 → 差し浮上。</p>
+  </div>
+  <div class="memo-block">
+    <p class="memo-label">逃げ馬の質</p>
+    <p class="memo-text">単騎か競り合いかで展開パターンが確定する。前走脚質と出馬表から事前特定必須。</p>
+  </div>
+  <div class="memo-block">
+    <p class="memo-label">枠順確定後</p>
+    <p class="memo-text">有力馬が7・8枠に入った場合は1段階評価割引。推し馬は1〜4枠に入れば加点。</p>
+  </div>
+  <div class="memo-block">
+    <p class="memo-label">構造一行メモ</p>
+    <p class="memo-text">「逃げ4割勝率・内枠独壇場・追込2勝のみ／先行軸＋3番人気差し紐が基本構造」</p>
+  </div>
+</div>
+
+<div style="text-align:right; font-size:11px; color:var(--color-text-tertiary); margin-top:0.5rem;">TURF SIGNAL 平安S事前分析</div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const isDark = matchMedia('(prefers-color-scheme: dark)').matches;
+const textColor = isDark ? 'rgba(255,255,255,0.55)' : 'rgba(0,0,0,0.45)';
+const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
+
+new Chart(document.getElementById('styleChart'), {
+  type: 'bar',
+  data: {
+    labels: ['逃げ','先行','差し','追込'],
+    datasets: [
+      { label: '1着', data: [11,9,5,2], backgroundColor: '#27500A' },
+      { label: '2着', data: [5,10,7,5], backgroundColor: '#639922' },
+      { label: '3着', data: [5,8,10,4], backgroundColor: '#C0DD97' }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { stacked: true, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 12 } } },
+      y: { stacked: true, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 } }, title: { display: true, text: '頭数', color: textColor, font: { size: 11 } } }
+    }
+  }
+});
+
+new Chart(document.getElementById('frameChart'), {
+  type: 'bar',
+  data: {
+    labels: ['1枠','2枠','3枠','4枠','5枠','6枠','7枠','8枠'],
+    datasets: [{
+      label: '複勝率(%)',
+      data: [20.0, 23.1, 24.5, 18.5, 20.4, 22.2, 11.1, 13.0],
+      backgroundColor: ['#27500A','#27500A','#27500A','#639922','#639922','#639922','#A32D2D','#A32D2D'],
+      borderRadius: 3
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 }, autoSkip: false } },
+      y: { grid: { color: gridColor }, ticks: { color: textColor, font: { size: 11 }, callback: v => v + '%' }, max: 30 }
+    }
+  }
+});
+</script>
