@@ -1,0 +1,201 @@
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4J7XM5HT7V"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-4J7XM5HT7V');
+</script>
+<style>
+  .bias-root { padding: 1.5rem 0; font-family: var(--font-sans); }
+  .bias-header { margin-bottom: 2rem; }
+  .bias-date { font-size: 12px; color: var(--color-text-tertiary); letter-spacing: 0.08em; margin-bottom: 4px; }
+  .confirmed-badge { display: inline-block; font-size: 11px; background: #EAF3DE; color: #3B6D11; border-radius: 4px; padding: 2px 8px; font-weight: 500; margin-left: 8px; vertical-align: middle; }
+  .bias-title { font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 4px; }
+  .bias-sub { font-size: 13px; color: var(--color-text-secondary); margin: 0; }
+  .venue-block { margin-bottom: 2rem; }
+  .venue-label { font-size: 11px; font-weight: 500; color: var(--color-text-tertiary); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .surface-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .surface-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 14px 16px; }
+  .surface-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 99px; margin-bottom: 10px; }
+  .tag-turf { background: #EAF3DE; color: #3B6D11; }
+  .tag-dirt { background: #FAEEDA; color: #854F0B; }
+  .track-bars { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+  .track-row { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+  .track-name { width: 28px; color: var(--color-text-secondary); flex-shrink: 0; }
+  .track-bar-wrap { flex: 1; height: 6px; background: var(--color-background-secondary); border-radius: 99px; overflow: hidden; }
+  .track-bar { height: 100%; border-radius: 99px; }
+  .bar-best { background: #1D9E75; }
+  .bar-good { background: #97C459; }
+  .bar-mid  { background: #D3D1C7; }
+  .bar-bad  { background: #F0997B; }
+  .track-mark { font-size: 12px; font-weight: 500; width: 20px; text-align: right; color: var(--color-text-primary); }
+  .pace-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .pace-chip { font-size: 11px; padding: 3px 9px; border-radius: 99px; border: 0.5px solid; }
+  .pace-s  { background: #FCEBEB; color: #A32D2D; border-color: #F09595; }
+  .pace-a  { background: #EAF3DE; color: #3B6D11; border-color: #C0DD97; }
+  .pace-b  { background: #FAEEDA; color: #854F0B; border-color: #FAC775; }
+  .pace-c  { background: var(--color-background-secondary); color: var(--color-text-tertiary); border-color: var(--color-border-tertiary); }
+  .meta-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  .meta-chip { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--color-text-secondary); background: var(--color-background-secondary); padding: 3px 9px; border-radius: 99px; }
+  .result-box { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 8px 12px; margin-top: 10px; }
+  .result-title { font-size: 10px; font-weight: 500; color: var(--color-text-tertiary); letter-spacing: 0.08em; margin-bottom: 5px; }
+  .result-row { font-size: 11px; color: var(--color-text-secondary); line-height: 1.7; }
+  .caution-box { background: #FAEEDA; border: 0.5px solid #FAC775; border-radius: var(--border-radius-md); padding: 10px 14px; margin-top: 14px; }
+  .caution-title { font-size: 11px; font-weight: 500; color: #854F0B; margin-bottom: 4px; display: flex; align-items: center; gap: 4px; }
+  .caution-list { margin: 0; padding-left: 14px; font-size: 12px; color: #854F0B; line-height: 1.7; }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 1.5rem; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--color-text-secondary); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .divider { border: none; border-top: 0.5px solid var(--color-border-tertiary); margin: 1.5rem 0; }
+  .update-note { font-size: 11px; color: var(--color-text-tertiary); margin-top: 1.5rem; padding-top: 1rem; border-top: 0.5px solid var(--color-border-tertiary); }
+</style>
+
+<div class="bias-root">
+  <div class="bias-header">
+    <p class="bias-date">2026.05.30（土）当日確定版<span class="confirmed-badge">1〜3R反映済</span></p>
+    <h1 class="bias-title">トラックバイアス確定レポート</h1>
+    <p class="bias-sub">東京・京都 ／ 当日1〜3R結果を反映した確定バイアスです。</p>
+  </div>
+
+  <div class="legend">
+    <span class="legend-item"><span class="legend-dot" style="background:#1D9E75"></span>絶好（＠）</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#97C459"></span>良好（◎）</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#D3D1C7"></span>普通（○）</span>
+    <span class="legend-item"><span class="legend-dot" style="background:#F0997B"></span>稍荒（△）</span>
+  </div>
+
+  <!-- 東京 -->
+  <div class="venue-block">
+    <p class="venue-label">東京競馬場</p>
+    <div class="surface-row">
+      <!-- 東京芝 -->
+      <div class="surface-card">
+        <span class="surface-tag tag-turf">芝</span>
+        <div class="track-bars">
+          <div class="track-row"><span class="track-name">最内</span><div class="track-bar-wrap"><div class="track-bar bar-bad" style="width:20%"></div></div><span class="track-mark">△</span></div>
+          <div class="track-row"><span class="track-name">内</span><div class="track-bar-wrap"><div class="track-bar bar-bad" style="width:25%"></div></div><span class="track-mark">△</span></div>
+          <div class="track-row"><span class="track-name">中</span><div class="track-bar-wrap"><div class="track-bar bar-good" style="width:65%"></div></div><span class="track-mark">◎</span></div>
+          <div class="track-row"><span class="track-name">外</span><div class="track-bar-wrap"><div class="track-bar bar-good" style="width:75%"></div></div><span class="track-mark">◎</span></div>
+          <div class="track-row"><span class="track-name">大外</span><div class="track-bar-wrap"><div class="track-bar bar-good" style="width:80%"></div></div><span class="track-mark">◎</span></div>
+        </div>
+        <div class="pace-row">
+          <span class="pace-chip pace-a">先行◎</span>
+          <span class="pace-chip pace-a">差し◎</span>
+          <span class="pace-chip pace-c">逃げ△</span>
+          <span class="pace-chip pace-c">追込△</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-chip">C値 9.9　標準〜やや硬め</span>
+          <span class="meta-chip">含水 14.9%　弾む</span>
+          <span class="meta-chip">Cコース初日</span>
+        </div>
+        <div class="result-box">
+          <div class="result-title">1〜3R 決まり手</div>
+          <div class="result-row">2R スロー 先行→差し→差し<br>3R ミドル 先行→差し→先行<br>→ 展開依存・先行差し並立</div>
+        </div>
+      </div>
+      <!-- 東京ダ -->
+      <div class="surface-card">
+        <span class="surface-tag tag-dirt">ダート</span>
+        <div class="track-bars">
+          <div class="track-row"><span class="track-name">最内</span><div class="track-bar-wrap"><div class="track-bar bar-mid" style="width:40%"></div></div><span class="track-mark">○</span></div>
+          <div class="track-row"><span class="track-name">内</span><div class="track-bar-wrap"><div class="track-bar bar-good" style="width:70%"></div></div><span class="track-mark">◎</span></div>
+          <div class="track-row"><span class="track-name">中</span><div class="track-bar-wrap"><div class="track-bar bar-good" style="width:70%"></div></div><span class="track-mark">◎</span></div>
+          <div class="track-row"><span class="track-name">外</span><div class="track-bar-wrap"><div class="track-bar bar-mid" style="width:40%"></div></div><span class="track-mark">○</span></div>
+          <div class="track-row"><span class="track-name">大外</span><div class="track-bar-wrap"><div class="track-bar bar-mid" style="width:30%"></div></div><span class="track-mark">○</span></div>
+        </div>
+        <div class="pace-row">
+          <span class="pace-chip pace-a">先行◎</span>
+          <span class="pace-chip pace-b">逃げ○</span>
+          <span class="pace-chip pace-c">差し△</span>
+          <span class="pace-chip pace-s">追込消し</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-chip">含水 2.7%　極乾燥</span>
+          <span class="meta-chip">良　砂厚9.0cm</span>
+        </div>
+        <div class="result-box">
+          <div class="result-title">1〜3R 決まり手（1R のみ）</div>
+          <div class="result-row">1R ミドル 先行→先行→差し<br>→ 先行支配継続</div>
+        </div>
+      </div>
+    </div>
+    <div class="caution-box">
+      <div class="caution-title"><i class="ti ti-alert-triangle" aria-hidden="true" style="font-size:13px"></i>注意事項</div>
+      <ul class="caution-list">
+        <li>芝はCコース初日・内柵沿い傷みが確認済み。C値が9.9へ微低下し標準域に入った。先行差し並立で展開次第。内枠先行馬は直線入口での不利に注意。</li>
+        <li>ダートは含水率2.7%の極乾燥。1R先行支配を確認。砂が軽く前が楽に走れる状態。追込は基本消し。</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- 京都 -->
+  <div class="venue-block">
+    <p class="venue-label">京都競馬場</p>
+    <div class="surface-row">
+      <!-- 京都芝 -->
+      <div class="surface-card">
+        <span class="surface-tag tag-turf">芝</span>
+        <div class="track-bars">
+          <div class="track-row"><span class="track-name">最内</span><div class="track-bar-wrap"><div class="track-bar bar-bad" style="width:20%"></div></div><span class="track-mark">△</span></div>
+          <div class="track-row"><span class="track-name">内</span><div class="track-bar-wrap"><div class="track-bar bar-bad" style="width:25%"></div></div><span class="track-mark">△</span></div>
+          <div class="track-row"><span class="track-name">中</span><div class="track-bar-wrap"><div class="track-bar bar-good" style="width:70%"></div></div><span class="track-mark">◎</span></div>
+          <div class="track-row"><span class="track-name">外</span><div class="track-bar-wrap"><div class="track-bar bar-good" style="width:80%"></div></div><span class="track-mark">◎</span></div>
+          <div class="track-row"><span class="track-name">大外</span><div class="track-bar-wrap"><div class="track-bar bar-good" style="width:75%"></div></div><span class="track-mark">◎</span></div>
+        </div>
+        <div class="pace-row">
+          <span class="pace-chip pace-b">差し○</span>
+          <span class="pace-chip pace-b">先行○</span>
+          <span class="pace-chip pace-c">逃げ△</span>
+          <span class="pace-chip pace-s">追込割引</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-chip">C値 10.2　やや硬め</span>
+          <span class="meta-chip">含水 8.3%　乾燥寄り</span>
+          <span class="meta-chip">Dコース継続</span>
+        </div>
+        <div class="result-box">
+          <div class="result-title">1〜3R 決まり手</div>
+          <div class="result-row">3R ハイ 差し→先行→先行<br>→ ハイペースで差し浮上・先行も残留</div>
+        </div>
+      </div>
+      <!-- 京都ダ -->
+      <div class="surface-card">
+        <span class="surface-tag tag-dirt">ダート</span>
+        <div class="track-bars">
+          <div class="track-row"><span class="track-name">最内</span><div class="track-bar-wrap"><div class="track-bar bar-mid" style="width:40%"></div></div><span class="track-mark">○</span></div>
+          <div class="track-row"><span class="track-name">内</span><div class="track-bar-wrap"><div class="track-bar bar-best" style="width:95%"></div></div><span class="track-mark">＠</span></div>
+          <div class="track-row"><span class="track-name">中</span><div class="track-bar-wrap"><div class="track-bar bar-mid" style="width:45%"></div></div><span class="track-mark">○</span></div>
+          <div class="track-row"><span class="track-name">外</span><div class="track-bar-wrap"><div class="track-bar bar-bad" style="width:15%"></div></div><span class="track-mark">△</span></div>
+          <div class="track-row"><span class="track-name">大外</span><div class="track-bar-wrap"><div class="track-bar bar-bad" style="width:10%"></div></div><span class="track-mark">△</span></div>
+        </div>
+        <div class="pace-row">
+          <span class="pace-chip pace-a">逃げ◎◎</span>
+          <span class="pace-chip pace-a">先行◎</span>
+          <span class="pace-chip pace-s">差し消し</span>
+          <span class="pace-chip pace-s">追込消し</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-chip">含水 5.1%　やや軽め</span>
+          <span class="meta-chip">良　砂厚9.0cm</span>
+        </div>
+        <div class="result-box">
+          <div class="result-title">1〜3R 決まり手</div>
+          <div class="result-row">1R ハイ 逃げ→先行→差し<br>2R ミドル 逃げ→先行→差し<br>→ 逃げ2連続確定。差し3着まで</div>
+        </div>
+      </div>
+    </div>
+    <div class="caution-box">
+      <div class="caution-title"><i class="ti ti-alert-triangle" aria-hidden="true" style="font-size:13px"></i>注意事項</div>
+      <ul class="caution-list">
+        <li>京都芝は3Rハイペースで差しが浮上したが先行も2・3着に残留。展開読みが引き続き重要。内柵沿い傷みは継続。</li>
+        <li>京都ダートは逃げ2連続確定。内＠の偏重は今週集計（内4・中0・外0）でも明確。外枠差し追込は消し方向。</li>
+      </ul>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+</div>
