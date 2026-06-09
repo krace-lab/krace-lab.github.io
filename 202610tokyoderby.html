@@ -1,0 +1,164 @@
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4J7XM5HT7V"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-4J7XM5HT7V');
+</script>
+<style>
+  .article-wrap { max-width: 660px; margin: 0 auto; padding: 2rem 1rem; font-family: var(--font-sans); }
+  .kv-header { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1.5rem; margin-bottom: 2rem; border-left: 3px solid #888780; }
+  .kv-title { font-size: 20px; font-weight: 500; color: var(--color-text-primary); margin: 0 0 .4rem; }
+  .kv-sub { font-size: 13px; color: var(--color-text-secondary); margin: 0; }
+  .section-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); margin: 1.8rem 0 .8rem; padding-bottom: .4rem; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  .summary-box { background: #EAF3DE; border-radius: var(--border-radius-md); padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
+  .summary-box p { font-size: 14px; color: #27500A; margin: 0; line-height: 1.7; }
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+  .stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: .9rem 1rem; }
+  .stat-label { font-size: 12px; color: var(--color-text-secondary); margin: 0 0 .3rem; }
+  .stat-value { font-size: 22px; font-weight: 500; color: var(--color-text-primary); margin: 0; }
+  .stat-note { font-size: 11px; color: var(--color-text-tertiary); margin: .2rem 0 0; }
+  .data-row { display: flex; justify-content: space-between; align-items: center; padding: .55rem 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 14px; }
+  .data-row:last-child { border-bottom: none; }
+  .data-key { color: var(--color-text-secondary); }
+  .data-val { font-weight: 500; color: var(--color-text-primary); }
+  .data-val.hi { color: #0F6E56; }
+  .data-val.md { color: #185FA5; }
+  .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; margin-left: 6px; }
+  .badge-g { background: #C0DD97; color: #27500A; }
+  .badge-b { background: #B5D4F4; color: #0C447C; }
+  .badge-r { background: #F7C1C1; color: #791F1F; }
+  .warn-box { background: #FAEEDA; border-radius: var(--border-radius-md); padding: .8rem 1rem; margin-top: 1rem; font-size: 13px; color: #633806; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: var(--color-background-secondary); color: var(--color-text-secondary); font-weight: 500; padding: .5rem .7rem; text-align: left; border-bottom: 0.5px solid var(--color-border-tertiary); }
+  td { padding: .5rem .7rem; border-bottom: 0.5px solid var(--color-border-tertiary); color: var(--color-text-primary); }
+  .num { text-align: right; }
+  .hi-row td { font-weight: 500; }
+  .lo-row td { color: var(--color-text-tertiary); }
+</style>
+
+<div class="article-wrap">
+
+  <div class="kv-header">
+    <p class="kv-title">東京ダービー — 過去10年データ分析まとめ</p>
+    <p class="kv-sub">第62回〜第71回（2015〜2025年）｜枠順・前走傾向</p>
+  </div>
+
+  <div class="summary-box">
+    <p>▶ 狙い馬の条件：<strong>羽田盃またはユニコーンSで2着以内 × 多頭数経験 × 外枠（7〜8枠）</strong><br>JpnI化（2024〜）以降はJRA所属馬の3着内率62.5%にも注目。</p>
+  </div>
+
+  <!-- 枠順 -->
+  <p class="section-title">枠順の傾向（過去10年）</p>
+
+  <div class="stat-grid">
+    <div class="stat-card">
+      <p class="stat-label">7〜8枠 3着内率</p>
+      <p class="stat-value">24.0%</p>
+      <p class="stat-note">直近2年は 30.0%</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">1〜3枠 3着内率</p>
+      <p class="stat-value">12.1%</p>
+      <p class="stat-note">直近2年は 0.0%</p>
+    </div>
+    <div class="stat-card">
+      <p class="stat-label">13番の3着内率</p>
+      <p class="stat-value">50.0%</p>
+      <p class="stat-note">2勝・最注目馬番</p>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>枠・馬番</th>
+          <th class="num">3着内率</th>
+          <th>備考</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="hi-row">
+          <td>7〜8枠</td>
+          <td class="num">24.0%</td>
+          <td><span class="badge badge-g">外枠◎</span></td>
+        </tr>
+        <tr class="hi-row">
+          <td>13番</td>
+          <td class="num">50.0%</td>
+          <td><span class="badge badge-g">2勝</span></td>
+        </tr>
+        <tr class="hi-row">
+          <td>12番</td>
+          <td class="num">40.0%</td>
+          <td><span class="badge badge-g">1勝</span></td>
+        </tr>
+        <tr>
+          <td>1〜3枠</td>
+          <td class="num">12.1%</td>
+          <td><span class="badge badge-r">内枠苦戦</span></td>
+        </tr>
+        <tr class="lo-row">
+          <td>1番・5番</td>
+          <td class="num">0.0%</td>
+          <td>過去10年で3着内なし</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 前走 -->
+  <p class="section-title">前走の傾向</p>
+
+  <div class="data-row">
+    <span class="data-key">最有力ステップ</span>
+    <span class="data-val hi">羽田盃<span class="badge badge-g">過去10年6勝</span></span>
+  </div>
+  <div class="data-row">
+    <span class="data-key">羽田盃2着以内→3着内率</span>
+    <span class="data-val hi">58.8%</span>
+  </div>
+  <div class="data-row">
+    <span class="data-key">ユニコーンS経由の3着内率</span>
+    <span class="data-val hi">75.0%<span class="badge badge-b">サンプル少</span></span>
+  </div>
+  <div class="data-row">
+    <span class="data-key">前走2着以内の3着内率</span>
+    <span class="data-val md">28.8%</span>
+  </div>
+  <div class="data-row">
+    <span class="data-key">前走主流距離</span>
+    <span class="data-val">1,800m<span class="badge badge-g">6勝</span></span>
+  </div>
+  <div class="data-row">
+    <span class="data-key">前走15頭以上の3着内率</span>
+    <span class="data-val md">31.8%</span>
+  </div>
+  <div class="data-row">
+    <span class="data-key">前走4角4番手以内（先行）</span>
+    <span class="data-val">過去10年で7勝</span>
+  </div>
+
+  <div class="warn-box">
+    ⚠ ユニコーンS経由は出走頭数が少なく、3着内率75.0%はサンプルに注意。JpnI化以降にJRA参戦増加で今後注目度が高まる。
+  </div>
+
+  <!-- 所属 -->
+  <p class="section-title">JpnI化以降（2024〜2025年）の変化</p>
+  <div class="data-row">
+    <span class="data-key">JRA所属馬の3着内率</span>
+    <span class="data-val hi">62.5%</span>
+  </div>
+  <div class="data-row">
+    <span class="data-key">内枠（1〜3枠）の3着内率</span>
+    <span class="data-val" style="color: #A32D2D;">0.0%（直近2年）</span>
+  </div>
+  <div class="data-row">
+    <span class="data-key">前走2着以内の馬</span>
+    <span class="data-val">3着内全馬が該当（直近2年）</span>
+  </div>
+
+</div>
