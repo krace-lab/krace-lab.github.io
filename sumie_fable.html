@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-4J7XM5HT7V"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-4J7XM5HT7V');
+</script>
+
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>墨戯 — 水墨画スケッチ</title>
+<style>
+  html, body { margin:0; padding:0; overflow:hidden; background:#efe9da; height:100%;
+    font-family:"Hiragino Mincho ProN","Yu Mincho",serif; }
+  #stage { position:fixed; inset:0; touch-action:none; }
+  canvas { position:absolute; inset:0; width:100%; height:100%; }
+  #ui { position:fixed; top:14px; right:16px; display:flex; gap:10px; z-index:10; }
+  #ui button {
+    width:40px; height:40px; border-radius:50%; border:1px solid rgba(40,40,60,.25);
+    background:rgba(245,240,225,.7); color:#2b2b3a; font-size:17px; cursor:pointer;
+    backdrop-filter:blur(2px);
+  }
+  #ui button:active { background:rgba(43,43,58,.15); }
+  #hint {
+    position:fixed; left:50%; bottom:26px; transform:translateX(-50%);
+    color:rgba(43,43,58,.55); font-size:13px; letter-spacing:.18em; z-index:10;
+    pointer-events:none; transition:opacity 1.2s; text-align:center; line-height:1.9;
+  }
+  #title {
+    position:fixed; top:20px; left:24px; color:rgba(43,43,58,.6); z-index:10;
+    writing-mode:vertical-rl; font-size:20px; letter-spacing:.4em; pointer-events:none;
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="bg"></canvas>
+  <canvas id="ink"></canvas>
+  <canvas id="fx"></canvas>
+</div>
+<div id="title">墨　戯</div>
+<div id="ui">
+  <button id="btnMute" title="音">♪</button>
+  <button id="btnReset" title="洗い流す">↺</button>
+</div>
+<div id="hint">筆で描くと、山水が立ちあがります<br>山なり・うねる横線・丸・縦線・点 …</div>
+
+<script>
+(() => {
+"use strict";
+
+/* ================= 基礎 ================= */
+const bgC = document.getElementById("bg");
+const inkC = document.getElementById("ink");
+const fxC = document.getElementById("fx");
+const bg = bgC.getContext("2d");
+const ink = inkC.getContext("2d");
+const fx = fxC.getContext("2d");
+let W = 0, H = 0, DPR = 1;
+
+/* 墨の三階調 */
+const NOU = 0.60, CHU = 0.30, TAN = 0.11;
+const INK_RGB = "38,40,54";           // 青みの墨
+function inkStyle(a){ return `rgba(${INK_RGB},${a})`; }
+
+let muted = false;
+document.getElementById("btnMute").onclick = e => {
+  muted = !muted; e.target.textContent = muted ? "×" : "♪";
+};
+
+/* 乱数(シード付き) */
+function rngFrom(seed){
+  let s = seed >>> 0 || 88675123;
+  return () => { s ^= s<<13; s>>>=0; s ^= s>>17; s ^= s<<5; s>>>=0; return s/4294967296; };
+}
+
+/* ================= 中点変位 ================= */
+/* 自然な稜線・岩肌のための非対称ノイズ。sin波は本ファイルで一切使用禁止(装飾用途を除く) */
+function midpointLine(x0,y0,x1,y1,depth,rough,rng){
+  let pts = [{x:x0,y:y0},{x:x1,y:y1}];
+  for(let d=0; d<depth; d++){
+    const next = [];
+    for(let i=0;i<pts.length-1;i++){
+      const a=pts[i], b=pts[i+1];
+      const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+      const len=Math.hypot(b.x-a.x,b.y-a.y);
+      next.push(a, {x:mx, y:my+(rng()-0.5)*len*rough});
+    }
+    next.push(pts[pts.length-1]);
+    pts = next;
+  }
+  return pts;
+}
+
+/* ================= 筆(線) ================= */
+/* 半透明円のスタンプ + 速度かすれ。widthは筆の半径基準 */
+function brushStroke(ctx, pts, {width=5, tone=NOU, dry=0, taper=true} = {}){
+  if(pts.length<2) return;
+  ctx.save();
+  ctx.globalCompositeOperation = "multiply";
+  let acc = 0;
+  const total = pts.reduce((s,p,i)=> i? s+Math.hypot(p.x-pts[i-1].x,p.y-pts[i-1].y):0, 0) || 1;
+  for(let i=1;i<pts.length;i++){
+    const a=pts[i-1], b=pts[i];
+    const seg=Math.hypot(b.x-a.x,b.y-a.y);
+    const steps=Math.max(1, Math.ceil(seg/Math.max(1.6,width*0.35)));
+    for(let s=0;s<=steps;s++){
+      const t=s/steps;
+      acc += seg/steps/ (s===0?1e9:1);
+      const prog=(ptsProgress(i,s,steps,pts))/1; // 進行率
+      const x=a.x+(b.x-a.x)*t, y=a.y+(b.y-a.y)*t;
+      /* 入筆太く・収筆で払う */
+      const tp = taper ? (0.55 + 0.9*Math.pow(1-progAlong(i,t,pts), 1.4)) : 1;
+      const r = Math.max(0.6, width*tp*(0.8+0.4*hash(i*7.3+s*1.7)));
+      if(dry>0 && hash(i*31.7+s*17.3) < dry) continue;   // かすれ
+      const jitter = width*0.18;
+      stamp(ctx, x+(hash(i+s*3.1)-0.5)*jitter, y+(hash(s+i*5.7)-0.5)*jitter,
+            r, tone*(0.28+0.24*hash(i*2.1+s)));
+    }
+  }
+  ctx.restore();
+
+  function stamp(c,x,y,r,a){
+    c.fillStyle = inkStyle(a);
+    c.beginPath(); c.arc(x,y,r,0,Math.PI*2); c.fill();
+  }
+  function hash(n){ const v=Math.imul(n*1e4|0,2654435761)>>>0; return (v%1000)/1000; }
+  function progAlong(i,t,arr){ return (i-1+t)/(arr.length-1); }
+  function ptsProgress(){ return 0; }
+}
+
+/* ================= 面(wash) — 本エンジンの主役 ================= */
+/* ポリゴンを淡墨の面で塗る。上→下へ透明化するグラデ + 縁のにじみ */
+function washPoly(ctx, poly, {tone=TAN, fadeDir=1, edgeBleed=true, solid=false} = {}){
+  if(poly.length<3) return;
+  let minY=Infinity,maxY=-Infinity;
+  for(const p of poly){ if(p.y<minY)minY=p.y; if(p.y>maxY)maxY=p.y; }
+  ctx.save();
+  ctx.globalCompositeOperation = "multiply";
+  ctx.beginPath();
+  ctx.moveTo(poly[0].x, poly[0].y);
+  for(let i=1;i<poly.length;i++) ctx.lineTo(poly[i].x, poly[i].y);
+  ctx.closePath();
+  if(solid){
+    ctx.fillStyle = inkStyle(tone);
+  } else {
+    const g = fadeDir>0
+      ? ctx.createLinearGradient(0,minY,0,maxY)
+      : ctx.createLinearGradient(0,maxY,0,minY);
+    g.addColorStop(0, inkStyle(tone));
+    g.addColorStop(0.62, inkStyle(tone*0.55));
+    g.addColorStop(1, inkStyle(0));
+    ctx.fillStyle = g;
+  }
+  ctx.fill();
+  /* 縁のにじみ: 境界に沿って淡い円をまばらに置き、輪郭を曖昧にする */
+  if(edgeBleed){
+    for(let i=0;i<poly.length-1;i+=2){
+      const p=poly[i];
+      ctx.fillStyle = inkStyle(tone*0.35);
+      ctx.beginPath();
+      ctx.arc(p.x+((i*137%7)-3), p.y+((i*89%5)-2), 3+(i*53%5), 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+  ctx.restore();
+}
+
+/* 側筆の一打ち(没骨): 涙滴状の面。雀の体・松の葉叢・花弁などに使う */
+function bokkotsu(ctx, x, y, len, wid, angle, tone){
+  const n = 14, poly=[];
+  for(let i=0;i<=n;i++){
+    const t=i/n, r = wid*Math.pow(4*t*(1-t), 0.7)*(t<0.35?1.15:1);
+    poly.push(rot(x, y, t*len, r, angle));
+  }
+  for(let i=n;i>=0;i--){
+    const t=i/n, r = wid*Math.pow(4*t*(1-t), 0.7);
+    poly.push(rot(x, y, t*len, -r, angle));
+  }
+  washPoly(ctx, poly, {tone, fadeDir:1, edgeBleed:false, solid:true});
+  function rot(cx,cy,dx,dy,a){
+    return {x:cx+dx*Math.cos(a)-dy*Math.sin(a), y:cy+dx*Math.sin(a)+dy*Math.cos(a)};
+  }
+}
+
+/* ================= 世界とゾーン ================= */
+const ZONE = { SKY:"sky", MID:"mid", GROUND:"ground" };
+function zoneOf(y){ return y < H*0.30 ? ZONE.SKY : y < H*0.58 ? ZONE.MID : ZONE.GROUND; }
+function zoneY(z){ return z===ZONE.SKY ? H*0.16 : z===ZONE.MID ? H*0.44 : H*0.76; }
+
+/* ================= レンダラー(全て 面→線 の順) ================= */
+/* 各rendererは ops 配列を返す。op = {kind:'wash'|'stroke'|'bokkotsu', ...} */
+const R = {};
+
+R.farMountain = (x, y, scale, rng) => {
+  const ops = [];
+  const layers = 2 + Math.floor(rng()*2);
+  for(let L=0; L<layers; L++){
+    const w = (W*0.45 + rng()*W*0.35) * scale;
+    const peakH = (H*0.06 + rng()*H*0.07) * (1 - L*0.2);
+    const baseY = y + L*H*0.045;
+    const ridge = midpointLine(x-w/2, baseY, x+w/2, baseY, 5, 0.5, rng)
+      .map((p,i,arr)=>{
+        const t=i/(arr.length-1);
+        const env = Math.pow(Math.max(0, 4*t*(1-t)), 0.8+rng()*0.6);
+        return {x:p.x, y:p.y - env*peakH - (p.y-baseY)*0.5};
+      });
+    const poly = [...ridge, {x:x+w/2, y:baseY+H*0.10}, {x:x-w/2, y:baseY+H*0.10}];
+    ops.push({kind:"wash", poly, tone: TAN*(1 - L*0.28), fadeDir:1});
+  }
+  return ops;
+};
+
+R.mountain = (x, y, scale, rng) => {
+  const ops = [];
+  const w = (W*0.30 + rng()*W*0.22) * scale;
+  const peakH = (H*0.14 + rng()*H*0.10) * scale;
+  const ridge = midpointLine(x-w/2, y, x+w/2, y, 6, 0.55, rng)
+    .map((p,i,arr)=>{
+      const t=i/(arr.length-1);
+      const skew = 0.35 + rng()*0.3;                   // 非対称ピーク
+      const env = Math.pow(Math.max(0, t<skew ? t/skew : (1-t)/(1-skew)), 0.85);
+      return {x:p.x, y:p.y - env*peakH - (p.y-y)*0.6};
+    });
+  /* ① 山体の面(中墨→裾は霞に溶ける) */
+  ops.push({kind:"wash",
+    poly:[...ridge, {x:x+w/2, y:y+H*0.09}, {x:x-w/2, y:y+H*0.09}],
+    tone: CHU, fadeDir:1});
+  /* ② 稜線(濃墨・かすれ) */
+  ops.push({kind:"stroke", pts:ridge, width:3.2*scale, tone:NOU, dry:0.25});
+  /* ③ 皴(しゅん): 稜線から流れ落ちる筆致 */
+  const shun = 14 + Math.floor(rng()*10);
+  for(let i=0;i<shun;i++){
+    const base = ridge[2+Math.floor(rng()*(ridge.length-4))];
+    const len = 18 + rng()*46;
+    const lean = (rng()-0.5)*26;
+    ops.push({kind:"stroke",
+      pts: midpointLine(base.x, base.y+4, base.x+lean, base.y+len, 2, 0.4, rng),
+      width: 1.6, tone: CHU*0.9, dry:0.35});
+  }
+  /* ④ 裾の霞 */
+  ops.push({kind:"mist", x, y:y+H*0.02, w:w*1.25});
+  return ops;
+};
+
+R.river = (x, y, scale, rng) => {
+  const ops = [];
+  const startY = Math.max(y, H*0.62);
+  /* 蛇行の芯 */
+  const spine = midpointLine(x, startY, x + (rng()-0.5)*W*0.2, H+20, 4, 0.35, rng);
+  /* ① 川面の淡い面(遠→手前へ広がる帯) */
+  const left=[], right=[];
+  spine.forEach((p,i)=>{
+    const t=i/(spine.length-1);
+    const half=(10+t*90)*scale;
+    left.push({x:p.x-half, y:p.y}); right.push({x:p.x+half, y:p.y});
+  });
+  ops.push({kind:"wash", poly:[...left, ...right.reverse()], tone:TAN*0.7, fadeDir:-1, edgeBleed:false});
+  /* ② 流線(濃淡ばらばら・遠は細く手前は太い) */
+  for(let l=0;l<9;l++){
+    const off=(l/8-0.5);
+    const pts=spine.map((p,i)=>{
+      const t=i/(spine.length-1);
+      return {x:p.x+off*(20+t*160)*scale + (rng()-0.5)*4, y:p.y};
+    });
+    ops.push({kind:"stroke", pts, width:0.9+2.4*(0.3+0.7*(l%3)/2), tone:[TAN,CHU,TAN*1.4][l%3], dry:0.3});
+  }
+  /* ③ 岸の葦・石 */
+  for(let i=0;i<10;i++){
+    const p=spine[Math.floor(rng()*spine.length*0.7)];
+    const side=rng()>0.5?1:-1, t=spine.indexOf(p)/(spine.length-1);
+    const bx=p.x+side*(26+t*110)*scale, by=p.y;
+    ops.push({kind:"stroke",
+      pts:[{x:bx,y:by},{x:bx+(rng()-0.5)*8, y:by-14-rng()*16}], width:1.2, tone:CHU, dry:0.2});
+  }
+  return ops;
+};
+
+R.moon = (x, y, scale, rng) => {
+  const ops = [];
+  const r = (26 + rng()*14) * scale;
+  const ring = [];
+  for(let i=0;i<=40;i++){
+    const a=(i/40)*Math.PI*2;
+    ring.push({x:x+Math.cos(a)*r*(0.97+rng()*0.06), y:y+Math.sin(a)*r*(0.97+rng()*0.06)});
+  }
+  ops.push({kind:"stroke", pts:ring, width:2.4, tone:CHU*0.9, dry:0.2, taper:false});
+  ops.push({kind:"glow", x, y, r:r*2.6});
+  return ops;
+};
+
+R.cloud = (x, y, scale, rng) => {
+  const ops = [];
+  for(let b=0;b<3;b++){
+    const w=(W*0.16+rng()*W*0.12)*scale, cy=y+(b-1)*14;
+    const top = midpointLine(x-w/2, cy, x+w/2, cy, 4, 0.25, rng)
+      .map(p=>({x:p.x, y:p.y-6-rng()*8}));
+    const poly=[...top, {x:x+w/2, y:cy+10}, {x:x-w/2, y:cy+10}];
+    ops.push({kind:"wash", poly, tone:TAN*(0.8-b*0.15), fadeDir:1, edgeBleed:false});
+  }
+  return ops;
+};
+
+R.bamboo = (x, y, scale, rng) => {
+  const ops = [];
+  const stalks = 4 + Math.floor(rng()*4);
+  const groundY = Math.max(y, H*0.64);
+  for(let s=0;s<stalks;s++){
+    const sx = x + (s-stalks/2)*26*scale + (rng()-0.5)*14;
+    const topY = groundY - (H*0.22+rng()*H*0.16)*scale;
+    const stalk = midpointLine(sx, groundY, sx+(rng()-0.5)*30, topY, 3, 0.12, rng);
+    /* 節ごとに区切って描く(節間の切れ目が竹らしさ) */
+    const segN = 5;
+    for(let g=0; g<segN; g++){
+      const a = Math.floor(stalk.length*g/segN), b = Math.floor(stalk.length*(g+1)/segN)-1;
+      ops.push({kind:"stroke", pts:stalk.slice(a, b+1),
+        width:(3.4-g*0.35)*scale, tone:CHU+g*0.03, dry:0.15, taper:false});
+    }
+    /* 葉: 没骨の一打ちを3枚ずつ */
+    for(let n=1;n<4;n++){
+      const p = stalk[Math.floor(stalk.length*(0.5+n*0.15))] || stalk[stalk.length-1];
+      for(let leaf=0; leaf<3; leaf++){
+        const a = Math.PI*(0.15+rng()*0.7) * (rng()>0.5?1:-1) + Math.PI*0.5;
+        ops.push({kind:"bokkotsu", x:p.x, y:p.y, len:22+rng()*16, wid:3.5+rng()*2,
+          angle:a - Math.PI*0.5 + (rng()-0.5), tone:NOU*0.8});
+      }
+    }
+  }
+  return ops;
+};
+
+R.karesansui = (x, y, scale, rng) => {
+  const ops = [];
+  const gy = Math.max(y, H*0.66);
+  /* 岩組: 面2枚重ね+輪郭 */
+  const rocks = 2 + Math.floor(rng()*2);
+  for(let r=0;r<rocks;r++){
+    const cx=x+(r-rocks/2)*54*scale+(rng()-0.5)*24, cy=gy+(rng()-0.5)*10;
+    const rw=(24+rng()*22)*scale, rh=rw*(0.55+rng()*0.3);
+    const top = midpointLine(cx-rw, cy, cx+rw, cy, 4, 0.5, rng)
+      .map((p,i,arr)=>{ const t=i/(arr.length-1);
+        return {x:p.x, y:p.y - Math.pow(Math.max(0,4*t*(1-t)),0.6)*rh}; });
+    const poly=[...top, {x:cx+rw, y:cy+rh*0.35}, {x:cx-rw, y:cy+rh*0.35}];
+    ops.push({kind:"wash", poly, tone:CHU, fadeDir:1});
+    ops.push({kind:"wash", poly:poly.map(p=>({x:p.x,y:p.y+rh*0.18})), tone:NOU*0.6, fadeDir:1, edgeBleed:false});
+    ops.push({kind:"stroke", pts:top, width:2.2, tone:NOU, dry:0.3});
+    /* 砂紋: 岩を囲む同心弧 */
+    for(let ring=1; ring<=3; ring++){
+      const rr=rw+ring*16*scale, arc=[];
+      for(let i=0;i<=30;i++){
+        const a=Math.PI*(1.06 - i/30*1.12);
+        arc.push({x:cx+Math.cos(a)*rr, y:cy+8+Math.sin(a)*rr*0.42});
+      }
+      ops.push({kind:"stroke", pts:arc, width:1.0, tone:TAN*1.3, dry:0.15, taper:false});
+    }
+  }
+  /* 平行砂紋 */
+  for(let i=0;i<5;i++){
+    const yy=gy+26+i*12;
+    ops.push({kind:"stroke",
+      pts:midpointLine(x-W*0.18, yy, x+W*0.18, yy, 3, 0.04, rng),
+      width:1.0, tone:TAN*1.2, dry:0.1, taper:false});
+  }
+  return ops;
+};
+
+R.plum = (x, y, scale, rng) => {
+  const ops = [];
+  const gy = Math.max(y, H*0.62);
+  const branch = midpointLine(x-40*scale, gy, x+70*scale, gy-80*scale, 4, 0.3, rng);
+  ops.push({kind:"stroke", pts:branch, width:4.2*scale, tone:NOU, dry:0.3});
+  const sub = midpointLine(branch[Math.floor(branch.length*0.55)].x, branch[Math.floor(branch.length*0.55)].y,
+                           x+20*scale, gy-120*scale, 3, 0.3, rng);
+  ops.push({kind:"stroke", pts:sub, width:2.4*scale, tone:NOU*0.9, dry:0.35});
+  const flowers = 6 + Math.floor(rng()*4);
+  for(let f=0; f<flowers; f++){
+    const host = rng()>0.4 ? branch : sub;
+    const p = host[3+Math.floor(rng()*(host.length-4))];
+    for(let petal=0; petal<5; petal++){
+      const a=(petal/5)*Math.PI*2 + rng();
+      ops.push({kind:"bokkotsu", x:p.x+Math.cos(a)*4, y:p.y+Math.sin(a)*4,
+        len:7+rng()*3, wid:3, angle:a, tone:TAN*1.6});
+    }
+    ops.push({kind:"stroke", pts:[{x:p.x,y:p.y},{x:p.x+1,y:p.y+1}], width:1.6, tone:NOU});
+  }
+  return ops;
+};
+
+R.geese = (x, y, scale, rng) => {
+  const ops = [];
+  const n = 5 + Math.floor(rng()*4);
+  for(let g=0; g<n; g++){
+    const gx = x+(g-n/2)*26*scale + (rng()-0.5)*10;
+    const gy = y + Math.abs(g-n/2)*11*scale + (rng()-0.5)*8;
+    /* 雁は「へ」の一筆: 没骨2打ち */
+    ops.push({kind:"bokkotsu", x:gx, y:gy, len:13*scale, wid:2.4, angle:Math.PI*1.15+(rng()-0.5)*0.2, tone:CHU*1.3});
+    ops.push({kind:"bokkotsu", x:gx, y:gy, len:13*scale, wid:2.4, angle:-Math.PI*0.15+(rng()-0.5)*0.2, tone:CHU*1.3});
+  }
+  return ops;
+};
+
+/* ================= 認識 → 解釈(形状 × ゾーン) ================= */
+function classify(pts){
+  const n = pts.length;
+  const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
+  const minX=Math.min(...xs), maxX=Math.max(...xs);
+  const minY=Math.min(...ys), maxY=Math.max(...ys);
+  const w=maxX-minX, h=maxY-minY;
+  const len=pts.reduce((s,p,i)=> i? s+Math.hypot(p.x-pts[i-1].x,p.y-pts[i-1].y):0,0);
+  const closed = Math.hypot(pts[0].x-pts[n-1].x, pts[0].y-pts[n-1].y) < Math.max(28, len*0.18);
+
+  if(len < 14) return "dot";
+  if(closed && w>18 && h>18 && Math.min(w,h)/Math.max(w,h) > 0.45) return "circle";
+  /* 山型: 最高点が中腹にあり両端が下がる */
+  const apexI = ys.indexOf(minY);
+  if(w > h*0.9 && apexI > n*0.2 && apexI < n*0.8 &&
+     ys[0]-minY > h*0.5 && ys[n-1]-minY > h*0.5) return "peak";
+  if(h > w*1.6) return "vertical";
+  if(w > h*2.0) return "horizontal";
+  return "horizontal";
+}
+
+function interpret(kind, cx, cy){
+  const z = zoneOf(cy);
+  switch(kind){
+    case "dot":       return z===ZONE.SKY ? {r:"geese", z:ZONE.SKY} : {r:"plum", z:ZONE.GROUND};
+    case "circle":    return z===ZONE.SKY ? {r:"moon", z:ZONE.SKY} : {r:"karesansui", z:ZONE.GROUND};
+    case "peak":      return z===ZONE.SKY ? {r:"farMountain", z:ZONE.SKY, snapY:H*0.30}
+                                          : {r:"mountain", z:ZONE.MID, snapY:H*0.52};
+    case "vertical":  return {r:"bamboo", z:ZONE.GROUND};
+    case "horizontal":return z===ZONE.SKY ? {r:"cloud", z:ZONE.SKY} : {r:"river", z:ZONE.GROUND};
+  }
+}
+
+/* ================= 進行描画(筆順アニメ) ================= */
+const active = [];   // 描画中オブジェクト
+let objSeq = 1;
+
+function spawn(rendererName, x, y, scale){
+  const rng = rngFrom(Date.now() ^ (objSeq++ * 2654435761));
+  const ops = R[rendererName](x, y, scale, rng);
+  /* strokeは点数、washは1、で重みづけして時間割り当て */
+  let totalW = 0;
+  ops.forEach(op => { op._w = op.kind==="stroke" ? Math.max(4, op.pts.length) : 8; totalW += op._w; });
+  const duration = Math.min(2200, 500 + totalW*6);
+  active.push({ops, start:performance.now(), duration, totalW, cursor:0, done:0});
+  brushSound(duration);
+}
+
+function tickActive(now){
+  for(let i=active.length-1; i>=0; i--){
+    const o = active[i];
+    const t = Math.min(1, (now-o.start)/o.duration);
+    const targetW = t * o.totalW;
+    let seen = 0;
+    for(let k=0; k<o.ops.length; k++){
+      const op = o.ops[k];
+      if(op._done) { seen += op._w; continue; }
+      if(seen + op._w <= targetW || t>=1){
+        drawOp(ink, op, 1); op._done = true; seen += op._w;
+      } else {
+        /* strokeだけ部分描画に対応(先頭から進める) */
+        if(op.kind === "stroke"){
+          const frac = (targetW - seen) / op._w;
+          const upto = Math.floor(op.pts.length * frac);
+          if(upto > (op._upto||0) + 1){
+            brushStroke(ink, op.pts.slice(op._upto||0, upto+1),
+              {width:op.width, tone:op.tone, dry:op.dry, taper:false});
+            op._upto = upto;
+          }
+        }
+        break;
+      }
+    }
+    if(t>=1) active.splice(i,1);
+  }
+}
+
+function drawOp(ctx, op){
+  if(op.kind==="wash") washPoly(ctx, op.poly, op);
+  else if(op.kind==="stroke"){
+    if(op._upto) brushStroke(ctx, op.pts.slice(op._upto), {width:op.width, tone:op.tone, dry:op.dry, taper:op.taper!==false});
+    else brushStroke(ctx, op.pts, {width:op.width, tone:op.tone, dry:op.dry, taper:op.taper!==false});
+  }
+  else if(op.kind==="bokkotsu") bokkotsu(ctx, op.x, op.y, op.len, op.wid, op.angle, op.tone);
+  else if(op.kind==="mist") mistPatches.push({x:op.x, y:op.y, w:op.w, born:performance.now()});
+  else if(op.kind==="glow") glows.push(op);
+}
+
+/* ================= 入力(筆) ================= */
+const stroke = [];
+let drawing = false;
+
+fxC.addEventListener("pointerdown", e => {
+  fxC.setPointerCapture(e.pointerId);
+  drawing = true; stroke.length = 0;
+  stroke.push(pt(e));
+});
+fxC.addEventListener("pointermove", e => {
+  if(!drawing) return;
+  const events = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+  for(const ev of events) stroke.push(pt(ev));
+});
+fxC.addEventListener("pointerup", finish);
+fxC.addEventListener("pointercancel", finish);
+
+function pt(e){
+  const r = fxC.getBoundingClientRect();
+  return {x:(e.clientX-r.left), y:(e.clientY-r.top),
+          p:(e.pressure && e.pressure>0)? e.pressure : 0.5, t:performance.now()};
+}
+
+function finish(){
+  if(!drawing) return;
+  drawing = false;
+  if(stroke.length < 1) return;
+  hideHint();
+  const kind = classify(stroke);
+  const xs=stroke.map(p=>p.x), ys=stroke.map(p=>p.y);
+  const cx=(Math.min(...xs)+Math.max(...xs))/2;
+  const cy=(Math.min(...ys)+Math.max(...ys))/2;
+  const w = Math.max(...xs)-Math.min(...xs);
+  const plan = interpret(kind, cx, cy);
+  const scale = Math.min(1.6, Math.max(0.5, w / (W*0.28)));
+  const y = plan.snapY !== undefined ? plan.snapY : cy;
+  /* 筆跡は霧散(fx層で1秒フェード) */
+  fadingStrokes.push({pts:stroke.slice(), born:performance.now()});
+  setTimeout(()=> spawn(plan.r, cx, Math.max(y, zoneY(plan.z)*0.7), scale), 320);
+}
+
+let hintHidden = false;
+function hideHint(){
+  if(hintHidden) return; hintHidden = true;
+  document.getElementById("hint").style.opacity = "0";
+}
+
+/* ================= fx層(毎フレーム) ================= */
+const fadingStrokes = [];
+const mistPatches = [];
+const glows = [];
+let mistBands = [];
+
+function frame(now){
+  tickActive(now);
+  fx.clearRect(0,0,W,H);
+
+  /* 描き途中の筆跡(実筆感) */
+  if(drawing && stroke.length>1){
+    fx.save();
+    brushStroke(fx, stroke.slice(-40), {width:6, tone:NOU*0.9, dry:0.1});
+    fx.restore();
+  }
+  /* 認識後、霧散する筆跡 */
+  for(let i=fadingStrokes.length-1;i>=0;i--){
+    const f=fadingStrokes[i];
+    const a=1-(now-f.born)/900;
+    if(a<=0){ fadingStrokes.splice(i,1); continue; }
+    fx.save(); fx.globalAlpha=a*0.5;
+    brushStroke(fx, f.pts, {width:6, tone:NOU, dry:0.1});
+    fx.restore();
+  }
+  /* 霞の帯(遠山の裾を隠す・超低速で漂う) */
+  fx.save();
+  for(const b of mistBands){
+    const drift = ((now*b.speed) % (W*0.24)) - W*0.12;
+    const g = fx.createLinearGradient(b.x-b.w/2+drift, 0, b.x+b.w/2+drift, 0);
+    g.addColorStop(0,"rgba(239,233,218,0)");
+    g.addColorStop(0.5,`rgba(243,238,226,${b.alpha})`);
+    g.addColorStop(1,"rgba(239,233,218,0)");
+    fx.fillStyle=g;
+    fx.beginPath();
+    fx.ellipse(b.x+drift, b.y, b.w/2, b.h, 0, 0, Math.PI*2);
+    fx.fill();
+  }
+  for(const m of mistPatches){
+    const g=fx.createLinearGradient(m.x-m.w/2,0,m.x+m.w/2,0);
+    g.addColorStop(0,"rgba(239,233,218,0)");
+    g.addColorStop(0.5,"rgba(243,238,226,0.5)");
+    g.addColorStop(1,"rgba(239,233,218,0)");
+    fx.fillStyle=g;
+    fx.beginPath(); fx.ellipse(m.x, m.y, m.w/2, 18, 0, 0, Math.PI*2); fx.fill();
+  }
+  for(const gl of glows){
+    const g=fx.createRadialGradient(gl.x,gl.y,4,gl.x,gl.y,gl.r);
+    g.addColorStop(0,"rgba(248,244,232,0.55)");
+    g.addColorStop(1,"rgba(248,244,232,0)");
+    fx.fillStyle=g; fx.fillRect(gl.x-gl.r,gl.y-gl.r,gl.r*2,gl.r*2);
+  }
+  fx.restore();
+
+  requestAnimationFrame(frame);
+}
+
+/* ================= 背景(和紙+初期遠山) ================= */
+function paintPaper(){
+  bg.fillStyle = "#efe9da";
+  bg.fillRect(0,0,W,H);
+  /* 繊維ノイズ */
+  const rng = rngFrom(20260704);
+  for(let i=0;i<3200;i++){
+    bg.fillStyle = `rgba(${150+rng()*60|0},${140+rng()*50|0},${110+rng()*40|0},${0.02+rng()*0.03})`;
+    bg.fillRect(rng()*W, rng()*H, 1+rng()*2, 1);
+  }
+  for(let i=0;i<70;i++){
+    bg.strokeStyle = `rgba(180,168,140,${0.03+rng()*0.03})`;
+    bg.lineWidth = 0.6;
+    const x=rng()*W, y=rng()*H, len=30+rng()*90, a=rng()*Math.PI;
+    bg.beginPath(); bg.moveTo(x,y);
+    bg.lineTo(x+Math.cos(a)*len, y+Math.sin(a)*len*0.3); bg.stroke();
+  }
+  /* ビネット */
+  const v = bg.createRadialGradient(W/2,H/2,Math.min(W,H)*0.42, W/2,H/2, Math.max(W,H)*0.75);
+  v.addColorStop(0,"rgba(60,55,40,0)");
+  v.addColorStop(1,"rgba(60,55,40,0.12)");
+  bg.fillStyle = v; bg.fillRect(0,0,W,H);
+}
+
+function initialScene(){
+  /* 起動時から絵として成立させる: 淡い遠山2群+霞 */
+  spawnSilent("farMountain", W*0.30, H*0.295, 1.0, 11);
+  spawnSilent("farMountain", W*0.74, H*0.28, 0.8, 47);
+  mistBands = [
+    {x:W*0.5, y:H*0.315, w:W*0.95, h:22, alpha:0.5, speed:0.004},
+    {x:W*0.45, y:H*0.40, w:W*0.7, h:26, alpha:0.35, speed:-0.003},
+  ];
+}
+function spawnSilent(name, x, y, scale, seed){
+  const rng = rngFrom(seed);
+  for(const op of R[name](x, y, scale, rng)) drawOp(ink, op);
+}
+
+/* ================= 音(合成のみ) ================= */
+let ac = null;
+function brushSound(ms){
+  if(muted) return;
+  try{
+    ac = ac || new (window.AudioContext||window.webkitAudioContext)();
+    const len = ac.sampleRate * Math.min(ms,1800)/1000;
+    const buf = ac.createBuffer(1, len, ac.sampleRate);
+    const d = buf.getChannelData(0);
+    for(let i=0;i<len;i++){
+      const t=i/len;
+      d[i] = (Math.random()*2-1) * 0.045 * Math.pow(4*t*(1-t),1.5);
+    }
+    const src = ac.createBufferSource(); src.buffer = buf;
+    const f = ac.createBiquadFilter(); f.type="lowpass"; f.frequency.value=900;
+    src.connect(f).connect(ac.destination); src.start();
+  }catch(e){}
+}
+
+/* ================= リセット/リサイズ ================= */
+document.getElementById("btnReset").onclick = () => {
+  active.length=0; fadingStrokes.length=0; mistPatches.length=0; glows.length=0;
+  ink.clearRect(0,0,W,H);
+  initialScene();
+};
+
+function resize(){
+  DPR = Math.min(2, window.devicePixelRatio||1);
+  W = window.innerWidth; H = window.innerHeight;
+  for(const c of [bgC, inkC, fxC]){
+    c.width = W*DPR; c.height = H*DPR;
+    c.getContext("2d").setTransform(DPR,0,0,DPR,0,0);
+  }
+  paintPaper();
+  ink.clearRect(0,0,W,H);
+  initialScene();
+}
+window.addEventListener("resize", resize);
+resize();
+requestAnimationFrame(frame);
+
+})();
+</script>
+</body>
+</html>
